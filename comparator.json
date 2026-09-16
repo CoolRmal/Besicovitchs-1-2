@@ -4,7 +4,10 @@
   "theorem_names": [
     "Besicovitch.sigma_one_plane_le_6934_div_10000",
     "Besicovitch.forcesOneRectifiability_plane_of_gt",
-    "Besicovitch.one_half_le_sigma_one_plane"
+    "Besicovitch.one_half_le_sigma_one_plane",
+    "Besicovitch.besicovitchPairCondition_of_gt_6934_div_10000",
+    "Besicovitch.forcesOneRectifiability_of_gt_6934_div_10000",
+    "Besicovitch.sigma_one_le_6934_div_10000"
   ],
   "permitted_axioms": [
     "propext",

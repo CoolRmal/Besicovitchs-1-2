@@ -58,7 +58,7 @@ approach here is inspired by theirs.**
 
 ## What is compared
 
-Three statements, all proved in `Solution.lean`:
+Six statements, all proved in `Solution.lean`:
 
 - `sigma_one_plane_le_6934_div_10000` — the upper bound.
 - `forcesOneRectifiability_plane_of_gt` — every threshold strictly above $0.6934$ forces
@@ -66,6 +66,16 @@ Three statements, all proved in `Solution.lean`:
 - `one_half_le_sigma_one_plane` — the lower bound. Together with the first it pins
   $\sigma_1(\mathbb{R}^2)$ to $[1/2, 0.6934]$; in particular the infimum is not the value Lean
   assigns to an empty set.
+- `besicovitchPairCondition_of_gt_6934_div_10000` — in **every** real inner product space, of any
+  dimension, the Besicovitch pair condition holds at every parameter above $0.6934$.
+- `forcesOneRectifiability_of_gt_6934_div_10000` and `sigma_one_le_6934_div_10000` — the same
+  rectifiability statement and upper bound in every finite-dimensional real inner product space,
+  in particular $\sigma_1(\mathbb{R}^n) \le 0.6934$ for every $n$.
+
+Nothing in the six-point argument is planar: the finite packing problem lives in the span of six
+points, and every certificate is a Gram-matrix inequality, so it holds in any inner product space.
+The step from the pair condition to rectifiability uses compactness of closed balls, hence the
+finite-dimensional hypothesis in the last two statements.
 
 `sigmaOne` is an infimum, not a minimum: nothing here claims it is attained.
 
