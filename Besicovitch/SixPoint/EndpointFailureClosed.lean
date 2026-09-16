@@ -24,10 +24,10 @@ noncomputable section
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 /-- The weighted geometric bound closes the endpoint at the two left children. -/
-theorem exists_nonnegative_score_of_matched_endpoint_zero [InnerProductSpace ℝ E]
+theorem exists_nonnegative_score_of_matched_endpoint_zero
     (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     {lambda mu : ℝ} (hlambda : 0 < lambda) (hmu : 0 < mu)
     (hmatching : SelectedDiagonalMatchingFails configuration)
@@ -48,7 +48,7 @@ theorem exists_nonnegative_score_of_matched_endpoint_zero [InnerProductSpace ℝ
     exact (not_lt_of_ge hweighted hpositive).elim
 
 /-- The weighted geometric bound closes the endpoint at the two right children. -/
-theorem exists_nonnegative_score_of_matched_endpoint_three [InnerProductSpace ℝ E]
+theorem exists_nonnegative_score_of_matched_endpoint_three
     (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     {lambda mu : ℝ} (hlambda : 0 < lambda) (hmu : 0 < mu)
     (hmatching : SelectedDiagonalMatchingFails configuration)

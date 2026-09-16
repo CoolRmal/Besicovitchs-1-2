@@ -22,10 +22,10 @@ noncomputable section
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 /-- The selected matching and endpoint force a failed red root--edge support onto `(1,1)`. -/
-theorem redRootEdge_failure_forces_type11 [InnerProductSpace ℝ E]
+theorem redRootEdge_failure_forces_type11
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hendpoint : redSiblingTriangleFailure configuration (.endpoint 0))
@@ -45,7 +45,7 @@ theorem redRootEdge_failure_forces_type11 [InnerProductSpace ℝ E]
     linarith
 
 /-- The selected matching and endpoint force a failed blue root--edge support onto `(1,1)`. -/
-theorem blueRootEdge_failure_forces_type11 [InnerProductSpace ℝ E]
+theorem blueRootEdge_failure_forces_type11
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hendpoint : blueSiblingTriangleFailure configuration (.endpoint 0))
@@ -71,7 +71,7 @@ theorem blueRootEdge_failure_forces_type11 [InnerProductSpace ℝ E]
     linarith
 
 /-- The two root--edge supports either win or both leave the active `(1,1)` inequalities. -/
-theorem exists_nonnegative_score_or_rootEdge_type11_pair [InnerProductSpace ℝ E]
+theorem exists_nonnegative_score_or_rootEdge_type11_pair
     (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hredEndpoint : redSiblingTriangleFailure configuration (.endpoint 0))

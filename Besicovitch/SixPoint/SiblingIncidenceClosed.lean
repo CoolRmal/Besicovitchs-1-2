@@ -25,9 +25,9 @@ noncomputable section
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
-private theorem endpointEndpoint_offMatching_excluded_aux [InnerProductSpace ℝ E]
+private theorem endpointEndpoint_offMatching_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {redCode blueCode : Fin 4}
     (horbit : endpointEndpointOrbit redCode blueCode = .offMatchingCoincident) :
@@ -41,7 +41,7 @@ private theorem endpointEndpoint_offMatching_excluded_aux [InnerProductSpace ℝ
     exact ⟨(redEndpointFailure_swapChildren configuration 2).2 failures.1,
       (blueEndpointFailure_swapChildren configuration 2).2 failures.2⟩
 
-private theorem endpointBalanced_e0s0_excluded_aux [InnerProductSpace ℝ E]
+private theorem endpointBalanced_e0s0_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {endpointCode balancedCode : Fin 4}
     (horbit : endpointBalancedOrbit endpointCode balancedCode = .e0s0) :
@@ -57,7 +57,7 @@ private theorem endpointBalanced_e0s0_excluded_aux [InnerProductSpace ℝ E]
     exact ⟨(redEndpointFailure_swapChildren configuration 3).2 failures.1,
       (blueBalancedFailure_swapChildren configuration 3).2 failures.2⟩
 
-private theorem endpointBalanced_e1s0_excluded_aux [InnerProductSpace ℝ E]
+private theorem endpointBalanced_e1s0_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {endpointCode balancedCode : Fin 4}
     (horbit : endpointBalancedOrbit endpointCode balancedCode = .e1s0) :
@@ -71,7 +71,7 @@ private theorem endpointBalanced_e1s0_excluded_aux [InnerProductSpace ℝ E]
     exact ⟨(redEndpointFailure_swapChildren configuration 2).2 failures.1,
       (blueBalancedFailure_swapChildren configuration 3).2 failures.2⟩
 
-private theorem balancedEndpoint_e0s0_excluded_aux [InnerProductSpace ℝ E]
+private theorem balancedEndpoint_e0s0_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {balancedCode endpointCode : Fin 4}
     (horbit : endpointBalancedOrbit (transposeEndpointCode endpointCode) balancedCode = .e0s0) :
@@ -86,7 +86,7 @@ private theorem balancedEndpoint_e0s0_excluded_aux [InnerProductSpace ℝ E]
   exact ⟨(redEndpointFailure_transposeColors configuration endpointCode).2 failures.2,
     (blueBalancedFailure_transposeColors configuration balancedCode).2 failures.1⟩
 
-private theorem balancedEndpoint_e1s0_excluded_aux [InnerProductSpace ℝ E]
+private theorem balancedEndpoint_e1s0_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {balancedCode endpointCode : Fin 4}
     (horbit : endpointBalancedOrbit (transposeEndpointCode endpointCode) balancedCode = .e1s0) :
@@ -101,7 +101,7 @@ private theorem balancedEndpoint_e1s0_excluded_aux [InnerProductSpace ℝ E]
   exact ⟨(redEndpointFailure_transposeColors configuration endpointCode).2 failures.2,
     (blueBalancedFailure_transposeColors configuration balancedCode).2 failures.1⟩
 
-private theorem balancedBalanced_s0s0_excluded_aux [InnerProductSpace ℝ E]
+private theorem balancedBalanced_s0s0_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {redCode blueCode : Fin 4}
     (horbit : balancedBalancedOrbit redCode blueCode = .s0s0) :
@@ -115,7 +115,7 @@ private theorem balancedBalanced_s0s0_excluded_aux [InnerProductSpace ℝ E]
     exact ⟨(redBalancedFailure_swapChildren configuration 3).2 failures.1,
       (blueBalancedFailure_swapChildren configuration 3).2 failures.2⟩
 
-private theorem balancedBalanced_s0s3_excluded_aux [InnerProductSpace ℝ E]
+private theorem balancedBalanced_s0s3_excluded_aux
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) {redCode blueCode : Fin 4}
     (horbit : balancedBalancedOrbit redCode blueCode = .s0s3) :
@@ -130,7 +130,7 @@ private theorem balancedBalanced_s0s3_excluded_aux [InnerProductSpace ℝ E]
       (blueBalancedFailure_swapChildren configuration 0).2 failures.2⟩
 
 /-- Every non-matched sibling-incidence cell is excluded at the exact endpoint. -/
-theorem siblingIncidenceExclusions_of_admissible [InnerProductSpace ℝ E]
+theorem siblingIncidenceExclusions_of_admissible
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     SiblingIncidenceExclusions (redSiblingTriangleFailure configuration)
@@ -164,6 +164,7 @@ theorem siblingIncidenceExclusions_of_admissible [InnerProductSpace ℝ E]
       · exact balancedBalanced_excluded_outside_lenses h hmatching redCode blueCode
           hzero hthree
 
+omit [InnerProductSpace ℝ E] in
 private theorem siblingIncidenceOutcome_failures_aux {configuration : SixPointConfiguration E}
     (houtcome : SiblingIncidenceOutcome configuration) :
     (∃ witness, redSiblingTriangleFailure configuration witness) ∧
@@ -182,7 +183,7 @@ private theorem siblingIncidenceOutcome_failures_aux {configuration : SixPointCo
     exact ⟨⟨.balanced redCode, hred⟩, ⟨.balanced blueCode, hblue⟩⟩
 
 /-- The sibling supports either give a nonnegative packing or fail at one matched endpoint. -/
-theorem exists_nonnegative_score_or_matched_sibling_endpoint [InnerProductSpace ℝ E]
+theorem exists_nonnegative_score_or_matched_sibling_endpoint
     (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     (∃ packing : SixPointPacking configuration, 0 ≤ packing.score barS) ∨

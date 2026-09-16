@@ -24,7 +24,7 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 private theorem norm_sub_sub_sq {E : Type*} [NormedAddCommGroup E]
     [InnerProductSpace ℝ E] (e x y : E) :
@@ -160,7 +160,7 @@ theorem gramCertificate_s0s0 {E : Type*} [NormedAddCommGroup E]
   nlinarith [s0s0_constant_neg]
 
 /-- The alternative positive separator is strictly negative for every admissible configuration. -/
-theorem balancedBalancedS0S0GramBound_of_admissible [InnerProductSpace ℝ E]
+theorem balancedBalancedS0S0GramBound_of_admissible
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     7 / 15 * diagonalMatchingReducedSlack configuration +
         redBalancedReducedSlack configuration 0 +
@@ -192,7 +192,7 @@ theorem balancedBalancedS0S0GramBound_of_admissible [InnerProductSpace ℝ E]
   nlinarith
 
 /-- The `S0/S0` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_zero_and_blueBalanced_zero [InnerProductSpace ℝ E]
+theorem not_redBalanced_zero_and_blueBalanced_zero
     {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 0) ∧
