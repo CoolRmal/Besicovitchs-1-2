@@ -54,8 +54,8 @@ theorem besicovitchPairCondition_of_gt_6934_div_10000 (E : Type*) [NormedAddComm
 /-- In every finite-dimensional real inner product space, in particular in every `ℝⁿ`, each
 threshold above `6934 / 10000` forces one-rectifiability. -/
 theorem forcesOneRectifiability_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] (β : ℝ)
-    (hβ : 6934 / 10000 < β) : ForcesOneRectifiability E (ENNReal.ofReal β) :=
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    (β : ℝ) (hβ : 6934 / 10000 < β) : ForcesOneRectifiability E (ENNReal.ofReal β) :=
   forcesOneRectifiability_of_gt E hβ
 
 /-- The threshold of every finite-dimensional real inner product space, in particular
