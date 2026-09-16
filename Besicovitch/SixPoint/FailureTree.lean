@@ -66,7 +66,8 @@ private theorem cross_child_distance_le_three {configuration : SixPointConfigura
       (add_le_add h.root_distance.le (h.child_distance .blue blueLabel hblue))
     _ = 3 := by norm_num
 
-private theorem exists_nonnegative_score_or_matching_obstruction_of_no_split [InnerProductSpace ℝ E]
+private theorem exists_nonnegative_score_or_matching_obstruction_of_no_split
+    [InnerProductSpace ℝ E]
     (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hno : ¬ ∃ x y : ℝ,
       dist (configuration .red .left) (configuration .red .right) - 1 ≤ x ∧ x ≤ 1 ∧

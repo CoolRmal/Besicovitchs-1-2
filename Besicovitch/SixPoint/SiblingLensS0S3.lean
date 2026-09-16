@@ -29,17 +29,20 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 /-- A real linear combination of five vectors has nonnegative squared norm, expanded through
 their Gram entries. -/
 private theorem s0s3_norm_sq_nonneg (a b c d f : ℝ) (e p₁ p₂ w₁ w₂ : E) :
-    0 ≤ a ^ 2 * ‖e‖ ^ 2 + b ^ 2 * ‖p₁‖ ^ 2 + c ^ 2 * ‖p₂‖ ^ 2 + d ^ 2 * ‖w₁‖ ^ 2 +
-      f ^ 2 * ‖w₂‖ ^ 2 + 2 * a * b * ⟪e, p₁⟫_ℝ + 2 * a * c * ⟪e, p₂⟫_ℝ +
-      2 * a * d * ⟪e, w₁⟫_ℝ + 2 * a * f * ⟪e, w₂⟫_ℝ + 2 * b * c * ⟪p₁, p₂⟫_ℝ +
-      2 * b * d * ⟪p₁, w₁⟫_ℝ + 2 * b * f * ⟪p₁, w₂⟫_ℝ + 2 * c * d * ⟪p₂, w₁⟫_ℝ +
+    0 ≤ a ^ 2 * ‖e‖ ^ 2 + b ^ 2 * ‖p₁‖ ^ 2 + c ^ 2 * ‖p₂‖ ^ 2 +
+      d ^ 2 * ‖w₁‖ ^ 2 + f ^ 2 * ‖w₂‖ ^ 2 +
+      2 * a * b * ⟪e, p₁⟫_ℝ + 2 * a * c * ⟪e, p₂⟫_ℝ +
+      2 * a * d * ⟪e, w₁⟫_ℝ + 2 * a * f * ⟪e, w₂⟫_ℝ +
+      2 * b * c * ⟪p₁, p₂⟫_ℝ + 2 * b * d * ⟪p₁, w₁⟫_ℝ +
+      2 * b * f * ⟪p₁, w₂⟫_ℝ + 2 * c * d * ⟪p₂, w₁⟫_ℝ +
       2 * c * f * ⟪p₂, w₂⟫_ℝ + 2 * d * f * ⟪w₁, w₂⟫_ℝ := by
   have h := sq_nonneg ‖a • e + b • p₁ + c • p₂ + d • w₁ + f • w₂‖
   rw [← real_inner_self_eq_norm_sq] at h
   simp only [inner_add_left, inner_add_right, inner_smul_left, inner_smul_right,
     real_inner_self_eq_norm_sq, RCLike.conj_to_real] at h
-  rw [real_inner_comm e p₁, real_inner_comm e p₂, real_inner_comm e w₁, real_inner_comm e w₂,
-    real_inner_comm p₁ p₂, real_inner_comm p₁ w₁, real_inner_comm p₁ w₂,
+  rw [real_inner_comm e p₁, real_inner_comm e p₂, real_inner_comm e w₁,
+    real_inner_comm e w₂, real_inner_comm p₁ p₂, real_inner_comm p₁ w₁,
+    real_inner_comm p₁ w₂,
     real_inner_comm p₂ w₁, real_inner_comm p₂ w₂, real_inner_comm w₁ w₂] at h
   nlinarith [h]
 
@@ -58,7 +61,8 @@ private theorem s0s3_gram_low_low (e p₁ p₂ w₁ w₂ : E) :
         871 / 100 * (‖p₁ - p₂‖ ^ 2 + ‖w₁ - w₂‖ ^ 2) := by
   rw [s0s3_norm_sub_sub_sq, s0s3_norm_sub_sub_sq, s0s3_norm_sub_sub_sq, norm_sub_sq_real,
     norm_sub_sq_real]
-  linarith [s0s3_norm_sq_nonneg (3511 / 1000) (41 / 40) (41 / 20) (41 / 20) (41 / 40) e p₁ p₂ w₁ w₂,
+  linarith [s0s3_norm_sq_nonneg (3511 / 1000) (41 / 40) (41 / 20) (41 / 20) (41 / 40)
+      e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 (733 / 250) (2253 / 1000) (-243 / 125) (-179 / 500) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 (843 / 500) (-203 / 100) (-2903 / 1000) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 (69 / 500) (67 / 500) e p₁ p₂ w₁ w₂,
@@ -73,7 +77,8 @@ private theorem s0s3_gram_low_low (e p₁ p₂ w₁ w₂ : E) :
     s0s3_norm_sq_nonneg 0 0 1 (-1) 0 e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 1 0 (-1) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 1 1 e p₁ p₂ w₁ w₂,
-    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖, sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
+    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖,
+    sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
 
 private theorem s0s3_gram_low_high (e p₁ p₂ w₁ w₂ : E) :
     18 / 5 * (‖e - p₁ - w₁‖ ^ 2 + ‖e - p₂ - w₁‖ ^ 2 +
@@ -85,7 +90,8 @@ private theorem s0s3_gram_low_high (e p₁ p₂ w₁ w₂ : E) :
     norm_sub_sq_real]
   linarith [s0s3_norm_sq_nonneg (1873 / 500) (961 / 1000) (961 / 500) (961 / 500) (961 / 1000)
       e p₁ p₂ w₁ w₂,
-    s0s3_norm_sq_nonneg 0 (2991 / 1000) (2221 / 1000) (-1821 / 1000) (-309 / 1000) e p₁ p₂ w₁ w₂,
+    s0s3_norm_sq_nonneg 0 (2991 / 1000) (2221 / 1000) (-1821 / 1000) (-309 / 1000)
+      e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 (1169 / 500) (-139 / 100) (-509 / 250) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 (29 / 200) (-1 / 500) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 0 1 e p₁ p₂ w₁ w₂,
@@ -99,7 +105,8 @@ private theorem s0s3_gram_low_high (e p₁ p₂ w₁ w₂ : E) :
     s0s3_norm_sq_nonneg 0 0 1 1 0 e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 1 0 (-1) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 1 1 e p₁ p₂ w₁ w₂,
-    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖, sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
+    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖,
+    sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
 
 private theorem s0s3_gram_high_high (e p₁ p₂ w₁ w₂ : E) :
     18 / 5 * (‖e - p₁ - w₁‖ ^ 2 + ‖e - p₂ - w₁‖ ^ 2 +
@@ -111,7 +118,8 @@ private theorem s0s3_gram_high_high (e p₁ p₂ w₁ w₂ : E) :
     norm_sub_sq_real]
   linarith [s0s3_norm_sq_nonneg (79 / 20) (911 / 1000) (1823 / 1000) (1823 / 1000) (911 / 1000)
       e p₁ p₂ w₁ w₂,
-    s0s3_norm_sq_nonneg 0 (2103 / 1000) (417 / 250) (-2501 / 1000) (-79 / 200) e p₁ p₂ w₁ w₂,
+    s0s3_norm_sq_nonneg 0 (2103 / 1000) (417 / 250) (-2501 / 1000) (-79 / 200)
+      e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 (1119 / 500) (-1229 / 1000) (-257 / 125) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 (157 / 1000) (-11 / 250) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 0 1 e p₁ p₂ w₁ w₂,
@@ -125,7 +133,8 @@ private theorem s0s3_gram_high_high (e p₁ p₂ w₁ w₂ : E) :
     s0s3_norm_sq_nonneg 0 0 1 (-1) 0 e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 1 0 (-1) e p₁ p₂ w₁ w₂,
     s0s3_norm_sq_nonneg 0 0 0 1 1 e p₁ p₂ w₁ w₂,
-    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖, sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
+    sq_nonneg ‖e‖, sq_nonneg ‖p₁‖, sq_nonneg ‖p₂‖,
+    sq_nonneg ‖w₁‖, sq_nonneg ‖w₂‖]
 
 private theorem s0s3_gram_high_low (e p₁ p₂ w₁ w₂ : E) :
     18 / 5 * (‖e - p₁ - w₁‖ ^ 2 + ‖e - p₂ - w₁‖ ^ 2 +
