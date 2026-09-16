@@ -22,10 +22,12 @@ open Bornology Set
 
 namespace Besicovitch
 
+variable {X : Type*} [MetricSpace X] [TopologicalSpace.SeparableSpace X] [PerfectSpace X]
+
 /-- A uniformly bounded family of nonempty bounded open sets has a countable disjoint subfamily
 meeting every member at a scale larger than half its diameter. -/
 theorem exists_countable_disjoint_subfamily
-    (family : Set (Set (EuclideanSpace ℝ (Fin 2))))
+    (family : Set (Set X))
     (hopen : ∀ V ∈ family, IsOpen V)
     (hnonempty : ∀ V ∈ family, V.Nonempty)
     (hbounded : ∀ V ∈ family, IsBounded V)

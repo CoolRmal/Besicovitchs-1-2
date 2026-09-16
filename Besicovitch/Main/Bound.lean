@@ -23,14 +23,23 @@ noncomputable section
 
 namespace Besicovitch
 
+/-- A positive subunit parameter satisfying the Besicovitch pair condition bounds the
+rectifiability threshold of a finite-dimensional real normed space. -/
+theorem BesicovitchPairCondition.sigmaOne_le {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] {s : ℝ}
+    (hpair : BesicovitchPairCondition E s) (hs : 0 < s) (hs_one : s < 1) :
+    sigmaOne E ≤ s := by
+  apply sigmaOne_le_of_forall_gt E hs.le
+  intro gamma hs_gamma
+  exact hpair.forcesOneRectifiability hs hs_one hs_gamma
+
 /-- A positive subunit parameter satisfying the Besicovitch pair condition bounds the planar
 rectifiability threshold. -/
 theorem BesicovitchPairCondition.sigmaOne_plane_le {s : ℝ}
-    (hpair : BesicovitchPairCondition s) (hs : 0 < s) (hs_one : s < 1) :
-    sigmaOne (EuclideanSpace ℝ (Fin 2)) ≤ s := by
-  apply sigmaOne_le_of_forall_gt (EuclideanSpace ℝ (Fin 2)) hs.le
-  intro gamma hs_gamma
-  exact hpair.forcesOneRectifiability hs hs_one hs_gamma
+    (hpair : BesicovitchPairCondition (EuclideanSpace ℝ (Fin 2)) s) (hs : 0 < s)
+    (hs_one : s < 1) :
+    sigmaOne (EuclideanSpace ℝ (Fin 2)) ≤ s :=
+  hpair.sigmaOne_le hs hs_one
 
 /-- The finite six-point property at a positive subunit parameter forces one-rectifiability
 at every larger threshold. -/
@@ -48,7 +57,7 @@ theorem SixPointFiniteProperty.forcesOneRectifiability_of_gt {s : ℝ}
     linarith
   have hbeta_gamma : beta < gamma := hbeta_min.trans_le (min_le_left _ _)
   have hbeta_one : beta < 1 := hbeta_min.trans_le (min_le_right _ _)
-  have hpair : BesicovitchPairCondition beta :=
+  have hpair : BesicovitchPairCondition (EuclideanSpace ℝ (Fin 2)) beta :=
     hfinite.besicovitchPairCondition hs hs_beta
   exact hpair.forcesOneRectifiability (hs.trans hs_beta) hbeta_one hbeta_gamma
 

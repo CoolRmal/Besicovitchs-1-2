@@ -515,7 +515,7 @@ private theorem exists_pair_neighborhood {mu : Measure (EuclideanSpace ℝ (Fin 
 /-- The finite six-point property at `s` implies the Besicovitch pair condition above `s`. -/
 theorem SixPointFiniteProperty.besicovitchPairCondition {s beta : ℝ} (hs : 0 < s)
     (hsbeta : s < beta) (hfinite : SixPointFiniteProperty s) :
-    BesicovitchPairCondition beta := by
+    BesicovitchPairCondition (EuclideanSpace ℝ (Fin 2)) beta := by
   obtain ⟨q₀, gamma, hq₀, hq₀_one, hs_div, hgamma, hgamma_beta, hs_gamma⟩ :=
     exists_transfer_parameters hs hsbeta
   have hbeta : 0 < beta := hs.trans hsbeta

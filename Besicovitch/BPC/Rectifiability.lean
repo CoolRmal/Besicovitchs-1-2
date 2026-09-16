@@ -28,17 +28,25 @@ open scoped ENNReal MeasureTheory Topology
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+  [MeasurableSpace E] [BorelSpace E]
+
 /-- The Besicovitch pair condition at `sigma < 1` forces rectifiability at every strictly larger
 density threshold. -/
 theorem BesicovitchPairCondition.forcesOneRectifiability
-    {sigma gamma : ℝ} (hpairCondition : BesicovitchPairCondition sigma)
+    {sigma gamma : ℝ} (hpairCondition : BesicovitchPairCondition E sigma)
     (hsigma : 0 < sigma) (hsigma_one : sigma < 1) (hsigma_gamma : sigma < gamma) :
-    ForcesOneRectifiability (EuclideanSpace ℝ (Fin 2)) (ENNReal.ofReal gamma) := by
-  intro E hE hE_finite hE_density
-  by_contra hE_not_rectifiable
-  obtain ⟨A, hA, hAE, hA_pos, hA_finite, hA_pure, hA_straight, hA_density⟩ :=
-    exists_pure_straight_subset_of_not_rectifiable hE hE_finite hE_not_rectifiable
-      hsigma.le hsigma_gamma hE_density
+    ForcesOneRectifiability E (ENNReal.ofReal gamma) := by
+  intro S hS hS_finite hS_density
+  by_contra hS_not_rectifiable
+  obtain ⟨A, hA, hAS, hA_pos, hA_finite, hA_pure, hA_straight, hA_density⟩ :=
+    exists_pure_straight_subset_of_not_rectifiable hS hS_finite hS_not_rectifiable
+      hsigma.le hsigma_gamma hS_density
+  haveI : Nontrivial E := by
+    by_contra hE
+    haveI : Subsingleton E := not_nontrivial_iff_subsingleton.mp hE
+    haveI := Measure.nullSingletonClass_hausdorff E one_pos
+    exact hA_pos.ne' (Set.subsingleton_of_subsingleton.measure_zero _)
   let mu := μH[1].restrict A
   letI : IsFiniteMeasure mu := isFiniteMeasure_restrict.mpr hA_finite.ne
   obtain ⟨tau, htau, hpair⟩ := hpairCondition mu hA_straight
@@ -74,11 +82,11 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
   obtain ⟨chosen, hchosen, hdisjoint, hcountable, hselect⟩ :=
     exists_countable_disjoint_badConvexSets (mu := mu) F halpha
   have hsum_lt :
-      (∑' V : chosen, Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2)))) <
+      (∑' V : chosen, Metric.ediam (V : Set E)) <
         ENNReal.ofReal (1 / 15 : ℝ) * mu F :=
     tsum_ediam_badConvexSets_lt hF_measurable halpha (by norm_num) hchosen
       hcountable hdisjoint houtside
-  have hsum : (∑' V : chosen, Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2)))) ≠ ∞ :=
+  have hsum : (∑' V : chosen, Metric.ediam (V : Set E)) ≠ ∞ :=
     ne_top_of_lt hsum_lt
   let lossRate := sigma * alpha / 28
   have hlossRate : 0 < lossRate := by
@@ -151,7 +159,7 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
         ring
   have hlocalSum :
       ∑' V : touchingBadConvexSets 3 chosen C,
-        Metric.ediam (diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2)))) <
+        Metric.ediam (diameterThickening 3 (V : Set E)) <
           Metric.ediam C :=
     tsum_ediam_touchingBadConvexSets_lt_ediam hF_measurable halpha hsigma hchosen
       hcountable hdisjoint hrho hzHoles hC_subset_ball hloss_two_rho hCdiam
@@ -170,8 +178,8 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
   obtain ⟨D, hD_compact, hD_connected, _, _, hD_ediam, _, hD_charged, _, hD_measure⟩ :=
     exists_continuum_surgery_open_holes hC_compact hC_connected hxC hyC hxy
       (fun V : touchingBadConvexSets 3 chosen C ↦
-        diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))
-      (fun V ↦ isOpen_diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2)))) hlocalSum
+        diameterThickening 3 (V : Set E))
+      (fun V ↦ isOpen_diameterThickening 3 (V : Set E)) hlocalSum
   have hC_subset_Q : C ⊆ Q := by
     simpa only [C, localAttachmentComponent, Q] using
       ((connectedComponentIn_subset
@@ -179,13 +187,13 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
           inter_subset_left)
   have hcore_subset_F :
       C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-        diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))) ⊆ F :=
+        diameterThickening 3 (V : Set E) ⊆ F :=
     sdiff_iUnion_touchingBadConvexSets_subset_core halpha hchosen hC_subset_Q
   have hF_finite : μH[1] F ≠ ∞ :=
     ne_top_of_le_ne_top hA_finite.ne (measure_mono hFA)
   have hcore_finite :
       μH[1] (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-        diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2)))) ≠ ∞ :=
+        diameterThickening 3 (V : Set E)) ≠ ∞ :=
     ne_top_of_le_ne_top hF_finite (measure_mono hcore_subset_F)
   have hD_finite : μH[1] D ≠ ∞ := by
     apply ne_top_of_le_ne_top _ hD_measure
@@ -196,7 +204,7 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
       hD_connected hD_compact hD_finite
   have hcore_null :
       μH[1] (D ∩ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-        diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) = 0 := by
+        diameterThickening 3 (V : Set E))) = 0 := by
     apply measure_mono_null _ (hA_pure D hD_rectifiable)
     rintro q ⟨hqD, hqcore⟩
     exact ⟨hFA (hcore_subset_F hqcore), hqD⟩
@@ -204,16 +212,16 @@ theorem BesicovitchPairCondition.forcesOneRectifiability
     calc
       μH[1] D = μH[1]
           ((D ∩ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-            diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) ∪
+            diameterThickening 3 (V : Set E))) ∪
           (D \ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-            diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2)))))) := by
+            diameterThickening 3 (V : Set E)))) := by
         rw [inter_union_sdiff]
       _ ≤ μH[1] (D ∩ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-            diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) +
+            diameterThickening 3 (V : Set E))) +
           μH[1] (D \ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-            diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) := measure_union_le _ _
+            diameterThickening 3 (V : Set E))) := measure_union_le _ _
       _ = μH[1] (D \ (C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-            diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) := by
+            diameterThickening 3 (V : Set E))) := by
         rw [hcore_null, zero_add]
       _ < Metric.ediam C := hD_charged
   have hD_lower : Metric.ediam C ≤ μH[1] D := by

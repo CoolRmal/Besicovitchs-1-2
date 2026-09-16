@@ -24,22 +24,24 @@ open Set
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Nontrivial E] [MeasurableSpace E]
+
 /-- Removing every three-diameter enlargement which touches `C` leaves only points of the compact
 core `F`. -/
 theorem sdiff_iUnion_touchingBadConvexSets_subset_core
-    {mu : MeasureTheory.Measure (EuclideanSpace ℝ (Fin 2))}
-    {F C : Set (EuclideanSpace ℝ (Fin 2))} {alpha : ℝ} (halpha : 0 < alpha)
-    {chosen : Set (Set (EuclideanSpace ℝ (Fin 2)))}
+    {mu : MeasureTheory.Measure E}
+    {F C : Set E} {alpha : ℝ} (halpha : 0 < alpha)
+    {chosen : Set (Set E)}
     (hchosen : chosen ⊆ badConvexSets mu F alpha)
     (hC : C ⊆ compactAttachmentUnion F chosen) :
     C \ ⋃ V : touchingBadConvexSets 3 chosen C,
-        diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))) ⊆ F := by
+        diameterThickening 3 (V : Set E) ⊆ F := by
   intro x hx
   rcases hC hx.1 with hxF | hxAttachment
   · exact hxF
   · obtain ⟨V, hxV⟩ := mem_iUnion.1 hxAttachment
     have hVbad := hchosen V.property
-    have hxThickening : x ∈ diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))) :=
+    have hxThickening : x ∈ diameterThickening 3 (V : Set E) :=
       convexAttachment_subset_diameterThickening_three hVbad.2.1
         (diam_pos_of_mem_badConvexSets halpha hVbad) hxV
     let W : touchingBadConvexSets 3 chosen C :=

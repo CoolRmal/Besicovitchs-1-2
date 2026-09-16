@@ -22,17 +22,20 @@ open Bornology Set
 
 namespace Besicovitch
 
+section Metric
+
+variable {X : Type*} [PseudoMetricSpace X]
+
 /-- Selected holes whose `p`-diameter enlargements meet a set. -/
 def touchingBadConvexSets (p : ℝ)
-    (chosen : Set (Set (EuclideanSpace ℝ (Fin 2))))
-    (C : Set (EuclideanSpace ℝ (Fin 2))) :
-    Set (Set (EuclideanSpace ℝ (Fin 2))) :=
+    (chosen : Set (Set X))
+    (C : Set X) : Set (Set X) :=
   {V | V ∈ chosen ∧ (diameterThickening p V ∩ C).Nonempty}
 
 /-- A hole touching the local continuum is contained in the doubled localization ball. -/
 theorem subset_ball_two_mul_of_diameterThickening_three_inter
-    {V C : Set (EuclideanSpace ℝ (Fin 2))}
-    (hV : IsBounded V) {z : (EuclideanSpace ℝ (Fin 2))} {rho : ℝ}
+    {V C : Set X}
+    (hV : IsBounded V) {z : X} {rho : ℝ}
     (hz : z ∉ diameterThickening 7 V) (hC : C ⊆ Metric.closedBall z rho)
     (htouch : (diameterThickening 3 V ∩ C).Nonempty) :
     V ⊆ Metric.ball z (2 * rho) := by
@@ -64,19 +67,24 @@ theorem subset_ball_two_mul_of_diameterThickening_three_inter
   rw [diameterThickening, Metric.mem_thickening_iff]
   exact ⟨w₂, hw₂V, hzw₂⟩
 
+end Metric
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E]
+  [OpensMeasurableSpace E]
+
 /-- The selected holes touching the local continuum charge only the doubled ball. -/
 theorem mul_tsum_ediam_touchingBadConvexSets_le
-    {mu : MeasureTheory.Measure (EuclideanSpace ℝ (Fin 2))}
-    {F : Set (EuclideanSpace ℝ (Fin 2))} (hF : MeasurableSet F)
-    {alpha : ℝ} (halpha : 0 < alpha) {chosen : Set (Set (EuclideanSpace ℝ (Fin 2)))}
+    {mu : MeasureTheory.Measure E}
+    {F : Set E} (hF : MeasurableSet F)
+    {alpha : ℝ} (halpha : 0 < alpha) {chosen : Set (Set E)}
     (hchosen : chosen ⊆ badConvexSets mu F alpha) (hcountable : chosen.Countable)
     (hdisjoint : chosen.PairwiseDisjoint id)
-    {C : Set (EuclideanSpace ℝ (Fin 2))} {z : (EuclideanSpace ℝ (Fin 2))} {rho : ℝ}
-    (hz : ∀ V : chosen, z ∉ diameterThickening 7 (V : Set (EuclideanSpace ℝ (Fin 2))))
+    {C : Set E} {z : E} {rho : ℝ}
+    (hz : ∀ V : chosen, z ∉ diameterThickening 7 (V : Set E))
     (hC : C ⊆ Metric.closedBall z rho) :
     ENNReal.ofReal alpha *
         ∑' V : touchingBadConvexSets 3 chosen C,
-          Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2))) ≤
+          Metric.ediam (V : Set E) ≤
       mu (Metric.ball z (2 * rho) \ F) := by
   let touching := touchingBadConvexSets 3 chosen C
   have hlocal_subset : touching ⊆ chosen := fun _ hV ↦ hV.1
@@ -97,39 +105,39 @@ theorem mul_tsum_ediam_touchingBadConvexSets_le
 /-- The three-diameter enlargements touching the local continuum have total diameter smaller than
 the continuum itself. -/
 theorem tsum_ediam_touchingBadConvexSets_lt_ediam
-    {mu : MeasureTheory.Measure (EuclideanSpace ℝ (Fin 2))}
-    {F : Set (EuclideanSpace ℝ (Fin 2))} (hF : MeasurableSet F)
+    {mu : MeasureTheory.Measure E}
+    {F : Set E} (hF : MeasurableSet F)
     {alpha sigma : ℝ} (halpha : 0 < alpha) (hsigma : 0 < sigma)
-    {chosen : Set (Set (EuclideanSpace ℝ (Fin 2)))}
+    {chosen : Set (Set E)}
     (hchosen : chosen ⊆ badConvexSets mu F alpha)
     (hcountable : chosen.Countable) (hdisjoint : chosen.PairwiseDisjoint id)
-    {C : Set (EuclideanSpace ℝ (Fin 2))} {z : (EuclideanSpace ℝ (Fin 2))} {rho : ℝ}
+    {C : Set E} {z : E} {rho : ℝ}
     (hrho : 0 < rho)
-    (hz : ∀ V : chosen, z ∉ diameterThickening 7 (V : Set (EuclideanSpace ℝ (Fin 2))))
+    (hz : ∀ V : chosen, z ∉ diameterThickening 7 (V : Set E))
     (hC : C ⊆ Metric.closedBall z rho)
     (houtside : mu (Metric.ball z (2 * rho) \ F) <
       ENNReal.ofReal alpha * ENNReal.ofReal (sigma * rho / 14))
     (hCdiam : ENNReal.ofReal (sigma * rho / 2) ≤ Metric.ediam C) :
     ∑' V : touchingBadConvexSets 3 chosen C,
-        Metric.ediam (diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2)))) <
+        Metric.ediam (diameterThickening 3 (V : Set E)) <
           Metric.ediam C := by
   have hpacking := mul_tsum_ediam_touchingBadConvexSets_le hF halpha hchosen hcountable
     hdisjoint hz hC
   have hsum : (∑' V : touchingBadConvexSets 3 chosen C,
-      Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2)))) < ENNReal.ofReal (sigma * rho / 14) := by
+      Metric.ediam (V : Set E)) < ENNReal.ofReal (sigma * rho / 14) := by
     exact lt_of_mul_lt_mul_left (hpacking.trans_lt houtside) (by positivity)
   calc
     (∑' V : touchingBadConvexSets 3 chosen C,
-        Metric.ediam (diameterThickening 3 (V : Set (EuclideanSpace ℝ (Fin 2))))) ≤
+        Metric.ediam (diameterThickening 3 (V : Set E))) ≤
         ∑' V : touchingBadConvexSets 3 chosen C,
-          ENNReal.ofReal 7 * Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2))) :=
+          ENNReal.ofReal 7 * Metric.ediam (V : Set E) :=
       ENNReal.tsum_le_tsum fun V ↦ by
         convert ediam_diameterThickening_le (by norm_num : (0 : ℝ) ≤ 3)
           (isBounded_of_mem_badConvexSets halpha (hchosen V.property.1)) using 1
         all_goals norm_num
     _ = ENNReal.ofReal 7 *
         ∑' V : touchingBadConvexSets 3 chosen C,
-          Metric.ediam (V : Set (EuclideanSpace ℝ (Fin 2))) :=
+          Metric.ediam (V : Set E) :=
       ENNReal.tsum_mul_left
     _ < ENNReal.ofReal 7 * ENNReal.ofReal (sigma * rho / 14) :=
       ENNReal.mul_lt_mul_right (by norm_num) ENNReal.ofReal_ne_top hsum

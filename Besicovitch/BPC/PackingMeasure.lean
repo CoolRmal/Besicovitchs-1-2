@@ -24,17 +24,19 @@ open scoped BigOperators ENNReal
 
 namespace Besicovitch
 
+variable {X : Type*} [MetricSpace X]
+
 /-- The union of the supported balls of one color. -/
 def colorBallUnion (support : Finset SixPointIndex)
-    (center : support → (EuclideanSpace ℝ (Fin 2)))
-    (radius : support → ℝ) (color : SixPointColor) : Set (EuclideanSpace ℝ (Fin 2)) :=
+    (center : support → X)
+    (radius : support → ℝ) (color : SixPointColor) : Set X :=
   ⋃ i : {i : support // i.1.1 = color}, Metric.ball (center i.1) (radius i.1)
 
 /-- Membership in a color ball union is witnessed by a supported index of that color. -/
 @[simp]
 theorem mem_colorBallUnion {support : Finset SixPointIndex}
-    {center : support → (EuclideanSpace ℝ (Fin 2))}
-    {radius : support → ℝ} {color : SixPointColor} {x : (EuclideanSpace ℝ (Fin 2))} :
+    {center : support → X}
+    {radius : support → ℝ} {color : SixPointColor} {x : X} :
     x ∈ colorBallUnion support center radius color ↔
       ∃ i : support, i.1.1 = color ∧ x ∈ Metric.ball (center i) (radius i) := by
   constructor
@@ -46,7 +48,7 @@ theorem mem_colorBallUnion {support : Finset SixPointIndex}
 
 /-- The full ball union is the union of its red and blue parts. -/
 theorem finiteBallUnion_eq_union_colorBallUnion (support : Finset SixPointIndex)
-    (center : support → (EuclideanSpace ℝ (Fin 2))) (radius : support → ℝ) :
+    (center : support → X) (radius : support → ℝ) :
     finiteBallUnion support center radius = colorBallUnion support center radius .red ∪
       colorBallUnion support center radius .blue := by
   ext x
@@ -60,22 +62,24 @@ theorem finiteBallUnion_eq_union_colorBallUnion (support : Finset SixPointIndex)
 
 /-- A single-color finite ball union is open. -/
 theorem isOpen_colorBallUnion (support : Finset SixPointIndex)
-    (center : support → (EuclideanSpace ℝ (Fin 2)))
+    (center : support → X)
     (radius : support → ℝ) (color : SixPointColor) :
     IsOpen (colorBallUnion support center radius color) :=
   isOpen_iUnion fun _ ↦ Metric.isOpen_ball
 
+variable [MeasurableSpace X] [OpensMeasurableSpace X]
+
 /-- A single-color finite ball union is measurable. -/
 theorem measurableSet_colorBallUnion (support : Finset SixPointIndex)
-    (center : support → (EuclideanSpace ℝ (Fin 2))) (radius : support → ℝ)
+    (center : support → X) (radius : support → ℝ)
     (color : SixPointColor) :
     MeasurableSet (colorBallUnion support center radius color) :=
   (isOpen_colorBallUnion support center radius color).measurableSet
 
 /-- The measure of a disjoint single-color ball union is the sum of its ball measures. -/
 theorem measure_colorBallUnion {support : Finset SixPointIndex}
-    (center : support → (EuclideanSpace ℝ (Fin 2)))
-    (radius : support → ℝ) (color : SixPointColor) (μ : Measure (EuclideanSpace ℝ (Fin 2)))
+    (center : support → X)
+    (radius : support → ℝ) (color : SixPointColor) (μ : Measure X)
     (hdisjoint : ∀ i j : support, i ≠ j → i.1.1 = j.1.1 →
       Disjoint (Metric.ball (center i) (radius i)) (Metric.ball (center j) (radius j))) :
     μ (colorBallUnion support center radius color) =
@@ -88,10 +92,11 @@ theorem measure_colorBallUnion {support : Finset SixPointIndex}
     · exact i.2.trans j.2.symm
   · exact fun _ ↦ measurableSet_ball
 
+omit [MeasurableSpace X] [OpensMeasurableSpace X] in
 /-- Red-blue ball overlap lies outside both center sets. -/
 theorem inter_colorBallUnion_subset_sdiff {support : Finset SixPointIndex}
-    (center : support → (EuclideanSpace ℝ (Fin 2))) (radius : support → ℝ)
-    (e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2)))
+    (center : support → X) (radius : support → ℝ)
+    (e : SixPointColor → Set X)
     (he : ∀ color, (e color).Nonempty) (hcenter : ∀ i, center i ∈ e i.1.1)
     (hradius : ∀ i, radius i ≤ (setEDist (e .red) (e .blue)).toReal) :
     colorBallUnion support center radius .red ∩ colorBallUnion support center radius .blue ⊆
@@ -114,9 +119,9 @@ theorem inter_colorBallUnion_subset_sdiff {support : Finset SixPointIndex}
 
 /-- The total ball mass is bounded by the union mass plus the mass outside both center sets. -/
 theorem sum_measure_ball_le_union_add_leakage {support : Finset SixPointIndex}
-    (center : support → (EuclideanSpace ℝ (Fin 2))) (radius : support → ℝ)
-    (e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2)))
-    (μ : Measure (EuclideanSpace ℝ (Fin 2))) (he : ∀ color, (e color).Nonempty)
+    (center : support → X) (radius : support → ℝ)
+    (e : SixPointColor → Set X)
+    (μ : Measure X) (he : ∀ color, (e color).Nonempty)
     (hcenter : ∀ i, center i ∈ e i.1.1)
     (hradius : ∀ i, radius i ≤ (setEDist (e .red) (e .blue)).toReal)
     (hdisjoint : ∀ i j : support, i ≠ j → i.1.1 = j.1.1 →
@@ -151,9 +156,9 @@ theorem sum_measure_ball_le_union_add_leakage {support : Finset SixPointIndex}
 
 /-- Density, straightness, and a leakage bound control the total supported radius. -/
 theorem density_sum_lt_one_add_leakage_mul_ediam {support : Finset SixPointIndex}
-    (hsupport : support.Nonempty) (center : support → (EuclideanSpace ℝ (Fin 2)))
-    (radius : support → ℝ) (e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2)))
-    (μ : Measure (EuclideanSpace ℝ (Fin 2))) {β scale : ℝ} {leakage : ℝ≥0∞}
+    (hsupport : support.Nonempty) (center : support → X)
+    (radius : support → ℝ) (e : SixPointColor → Set X)
+    (μ : Measure X) {β scale : ℝ} {leakage : ℝ≥0∞}
     (hβ : 0 ≤ β) (he : ∀ color, (e color).Nonempty)
     (hcenter : ∀ i, center i ∈ e i.1.1) (hradius_pos : ∀ i, 0 < radius i)
     (hradius_lt : ∀ i, radius i < scale)

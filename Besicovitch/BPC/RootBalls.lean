@@ -17,18 +17,19 @@ The direct pair-condition transfer charges both child extractions to one union o
 
 namespace Besicovitch
 
+variable {X : Type*} [PseudoMetricSpace X]
+
 /-- The common open neighborhood formed by two balls of the same radius. -/
-def rootBallUnion (x y : (EuclideanSpace ℝ (Fin 2))) (r : ℝ) :
-    Set (EuclideanSpace ℝ (Fin 2)) :=
+def rootBallUnion (x y : X) (r : ℝ) : Set X :=
   Metric.ball x r ∪ Metric.ball y r
 
 /-- The common root-ball union is open. -/
-theorem isOpen_rootBallUnion (x y : (EuclideanSpace ℝ (Fin 2))) (r : ℝ) :
+theorem isOpen_rootBallUnion (x y : X) (r : ℝ) :
     IsOpen (rootBallUnion x y r) :=
   Metric.isOpen_ball.union Metric.isOpen_ball
 
 /-- The diameter of the common root-ball union is bounded by root distance plus two radii. -/
-theorem ediam_rootBallUnion_le (x y : (EuclideanSpace ℝ (Fin 2))) (r : ℝ) :
+theorem ediam_rootBallUnion_le (x y : X) (r : ℝ) :
     Metric.ediam (rootBallUnion x y r) ≤ ENNReal.ofReal (dist x y + 2 * r) := by
   apply Metric.ediam_le_of_forall_dist_le
   intro a ha b hb

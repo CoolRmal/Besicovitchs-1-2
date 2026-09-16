@@ -23,21 +23,23 @@ open Bornology Set
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
 /-- The compact convex piece attached to the core near a selected hole. -/
-def convexAttachment (F V : Set (EuclideanSpace ℝ (Fin 2))) : Set (EuclideanSpace ℝ (Fin 2)) :=
+def convexAttachment (F V : Set E) : Set E :=
   closure (convexHull ℝ (F ∩ diameterThickening 2 V))
 
 /-- A convex attachment is closed and convex. -/
-theorem isClosed_convexAttachment (F V : Set (EuclideanSpace ℝ (Fin 2))) :
+theorem isClosed_convexAttachment (F V : Set E) :
     IsClosed (convexAttachment F V) :=
   isClosed_closure
 
-theorem convex_convexAttachment (F V : Set (EuclideanSpace ℝ (Fin 2))) :
+theorem convex_convexAttachment (F V : Set E) :
     Convex ℝ (convexAttachment F V) :=
   (convex_convexHull ℝ (F ∩ diameterThickening 2 V)).closure
 
 /-- Attachments to a compact core are compact. -/
-theorem isCompact_convexAttachment {F V : Set (EuclideanSpace ℝ (Fin 2))} (hF : IsCompact F) :
+theorem isCompact_convexAttachment [ProperSpace E] {F V : Set E} (hF : IsCompact F) :
     IsCompact (convexAttachment F V) := by
   apply Metric.isCompact_iff_isClosed_bounded.2
   refine ⟨isClosed_convexAttachment F V, ?_⟩
@@ -46,7 +48,7 @@ theorem isCompact_convexAttachment {F V : Set (EuclideanSpace ℝ (Fin 2))} (hF 
   exact hF.isBounded.subset inter_subset_left
 
 /-- Every core point already in a hole belongs to its attachment. -/
-theorem inter_subset_convexAttachment {F V : Set (EuclideanSpace ℝ (Fin 2))}
+theorem inter_subset_convexAttachment {F V : Set E}
     (hdiam : 0 < Metric.diam V) :
     F ∩ V ⊆ convexAttachment F V := by
   intro x hx
@@ -55,7 +57,7 @@ theorem inter_subset_convexAttachment {F V : Set (EuclideanSpace ℝ (Fin 2))}
   exact ⟨hx.1, subset_diameterThickening (by positivity) hx.2⟩
 
 /-- An attachment has diameter at most five times the diameter of its hole. -/
-theorem diam_convexAttachment_le {F V : Set (EuclideanSpace ℝ (Fin 2))} (hV : IsBounded V) :
+theorem diam_convexAttachment_le {F V : Set E} (hV : IsBounded V) :
     Metric.diam (convexAttachment F V) ≤ 5 * Metric.diam V := by
   calc
     Metric.diam (convexAttachment F V) =
@@ -69,7 +71,7 @@ theorem diam_convexAttachment_le {F V : Set (EuclideanSpace ℝ (Fin 2))} (hV : 
       all_goals norm_num
 
 /-- The same five-fold bound holds for extended diameter. -/
-theorem ediam_convexAttachment_le {F V : Set (EuclideanSpace ℝ (Fin 2))} (hV : IsBounded V) :
+theorem ediam_convexAttachment_le {F V : Set E} (hV : IsBounded V) :
     Metric.ediam (convexAttachment F V) ≤ ENNReal.ofReal 5 * Metric.ediam V := by
   calc
     Metric.ediam (convexAttachment F V) =
@@ -82,7 +84,7 @@ theorem ediam_convexAttachment_le {F V : Set (EuclideanSpace ℝ (Fin 2))} (hV :
       all_goals norm_num
 
 /-- For a positive-diameter convex hole, its attachment lies in the three-diameter enlargement. -/
-theorem convexAttachment_subset_diameterThickening_three {F V : Set (EuclideanSpace ℝ (Fin 2))}
+theorem convexAttachment_subset_diameterThickening_three {F V : Set E}
     (hV_convex : Convex ℝ V) (hdiam : 0 < Metric.diam V) :
     convexAttachment F V ⊆ diameterThickening 3 V := by
   rw [convexAttachment, diameterThickening]
@@ -100,9 +102,9 @@ theorem convexAttachment_subset_diameterThickening_three {F V : Set (EuclideanSp
       · nlinarith
 
 /-- A bad hole has a nonempty compact connected attachment. -/
-theorem convexAttachment_isCompact_isConnected
-    {mu : MeasureTheory.Measure (EuclideanSpace ℝ (Fin 2))}
-    {F V : Set (EuclideanSpace ℝ (Fin 2))} {alpha : ℝ} (hF : IsCompact F)
+theorem convexAttachment_isCompact_isConnected [ProperSpace E] [Nontrivial E]
+    [MeasurableSpace E] {mu : MeasureTheory.Measure E}
+    {F V : Set E} {alpha : ℝ} (hF : IsCompact F)
     (halpha : 0 < alpha) (hV : V ∈ badConvexSets mu F alpha) :
     IsCompact (convexAttachment F V) ∧ IsConnected (convexAttachment F V) := by
   have hdiam := diam_pos_of_mem_badConvexSets halpha hV
