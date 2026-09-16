@@ -21,6 +21,8 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- The index permutation that interchanges the two blue children. -/
 def swapBlueIndexEquiv : SixPointIndex ≃ SixPointIndex where
   toFun
@@ -47,33 +49,36 @@ def swapBlueIndexEquiv : SixPointIndex ≃ SixPointIndex where
   cases color <;> cases label <;> rfl
 
 /-- The configuration obtained by interchanging the two blue children. -/
-def swapBlueChildren (configuration : SixPointConfiguration) : SixPointConfiguration
+def swapBlueChildren (configuration : SixPointConfiguration E) : SixPointConfiguration E
   | .red, label => configuration .red label
   | .blue, label => configuration .blue (swapChildLabel label)
 
+omit [NormedAddCommGroup E] in
 private theorem swapBlueChildren_swapBlueIndex
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapBlueChildren configuration (swapBlueIndexEquiv index).1
         (swapBlueIndexEquiv index).2 = configuration index.1 index.2 := by
   rcases index with ⟨color, label⟩
   cases color <;> cases label <;> rfl
 
+omit [NormedAddCommGroup E] in
 @[simp] private theorem swapBlueChildren_swappedLabel
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapBlueChildren configuration index.1 (swapBlueIndexEquiv index).2 =
       configuration index.1 index.2 := by
   rcases index with ⟨color, label⟩
   cases color <;> cases label <;> rfl
 
+omit [NormedAddCommGroup E] in
 @[simp] private theorem swapBlueChildren_eq_swapBlueIndex
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapBlueChildren configuration index.1 index.2 =
       configuration (swapBlueIndexEquiv index).1 (swapBlueIndexEquiv index).2 := by
   rcases index with ⟨color, label⟩
   cases color <;> cases label <;> rfl
 
 /-- Swapping the blue children preserves endpoint admissibility. -/
-theorem IsAdmissibleAt.swapBlueChildren {configuration : SixPointConfiguration} {s : ℝ}
+theorem IsAdmissibleAt.swapBlueChildren {configuration : SixPointConfiguration E} {s : ℝ}
     (h : configuration.IsAdmissibleAt s) :
     (swapBlueChildren configuration).IsAdmissibleAt s where
   root_distance := h.root_distance
@@ -93,7 +98,7 @@ theorem IsAdmissibleAt.swapBlueChildren {configuration : SixPointConfiguration} 
 
 /-- After swapping the blue children, the selected diagonal is the original anti-diagonal. -/
 theorem selectedDiagonalMatchingFails_swapBlueChildren
-    (configuration : SixPointConfiguration) :
+    (configuration : SixPointConfiguration E) :
     SelectedDiagonalMatchingFails (swapBlueChildren configuration) ↔
       (2 * barC - 1) *
           (dist (configuration .red .left) (configuration .red .right) +
@@ -114,7 +119,7 @@ theorem swapBlueIndex_mem_of_mem_map {support : Finset SixPointIndex}
   simpa using hsource
 
 /-- Relabel a packing after the two blue children have been swapped. -/
-def unswapBlue {configuration : SixPointConfiguration}
+def unswapBlue {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration)) :
     SixPointPacking configuration where
   support := packing.support.map swapBlueIndexEquiv.toEmbedding
@@ -143,7 +148,7 @@ def unswapBlue {configuration : SixPointConfiguration}
     have hp := packing.same_color_disjoint i' j' hij' hcolor'
     simpa [i', j', swapBlueChildren_swappedLabel] using hp
 
-private def unswapBlueSupportEquiv {configuration : SixPointConfiguration}
+private def unswapBlueSupportEquiv {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration)) :
     (packing.unswapBlue).support ≃ packing.support where
   toFun index := ⟨swapBlueIndexEquiv index, swapBlueIndex_mem_of_mem_map index.2⟩
@@ -156,21 +161,21 @@ private def unswapBlueSupportEquiv {configuration : SixPointConfiguration}
     exact swapBlueIndexEquiv_involution index
 
 @[simp] private theorem unswapBlueSupportEquiv_apply_val
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration))
     (index : packing.unswapBlue.support) :
     ((unswapBlueSupportEquiv packing index : packing.support) : SixPointIndex) =
       swapBlueIndexEquiv index := rfl
 
 @[simp] private theorem unswapBlueSupportEquiv_symm_apply_val
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration))
     (index : packing.support) :
     (((unswapBlueSupportEquiv packing).symm index : packing.unswapBlue.support) :
       SixPointIndex) = swapBlueIndexEquiv index := rfl
 
 @[simp] private theorem unswapBlue_radius_eq
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration))
     (index : packing.unswapBlue.support) :
     (packing.unswapBlue.radius index : ℝ) =
@@ -178,7 +183,7 @@ private def unswapBlueSupportEquiv {configuration : SixPointConfiguration}
   congr 1
 
 private theorem unswapBlue_radius_symm_eq
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration))
     (index : packing.support) :
     (packing.unswapBlue.radius ((unswapBlueSupportEquiv packing).symm index) : ℝ) =
@@ -188,7 +193,7 @@ private theorem unswapBlue_radius_symm_eq
     ((unswapBlueSupportEquiv packing).apply_symm_apply index)
 
 /-- Swapping child names leaves the packing's total radius unchanged. -/
-theorem unswapBlue_totalRadius {configuration : SixPointConfiguration}
+theorem unswapBlue_totalRadius {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration)) :
     packing.unswapBlue.totalRadius = packing.totalRadius := by
   unfold totalRadius
@@ -198,7 +203,7 @@ theorem unswapBlue_totalRadius {configuration : SixPointConfiguration}
   congr 1
 
 /-- Swapping child names leaves the packing's virtual diameter unchanged. -/
-theorem unswapBlue_virtualDiameter {configuration : SixPointConfiguration}
+theorem unswapBlue_virtualDiameter {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration)) :
     packing.unswapBlue.virtualDiameter = packing.virtualDiameter := by
   apply le_antisymm
@@ -222,7 +227,7 @@ theorem unswapBlue_virtualDiameter {configuration : SixPointConfiguration}
         ((unswapBlueSupportEquiv packing).symm i) ((unswapBlueSupportEquiv packing).symm j)
 
 /-- Swapping child names leaves the packing score unchanged. -/
-theorem unswapBlue_score {configuration : SixPointConfiguration}
+theorem unswapBlue_score {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapBlueChildren configuration)) (s : ℝ) :
     packing.unswapBlue.score s = packing.score s := by
   simp only [score, packing.unswapBlue_totalRadius, packing.unswapBlue_virtualDiameter]

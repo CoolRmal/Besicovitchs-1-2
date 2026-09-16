@@ -26,6 +26,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- The cross-color part of a root-edge split with edge length `R`. -/
 def rootEdgeCrossMaximum (R x : ℝ) (rootReach childReach : SixPointLabel → ℝ) : ℝ :=
   max (x + triangleMaximum rootReach) (R - x + triangleMaximum childReach)
@@ -141,7 +143,7 @@ theorem rootEdge_failure_reduces_to_three_types {R M T : ℝ}
     · exact Or.inr <| Or.inr <| by nlinarith
 
 /-- Supports `37` and `57`: a red root--child edge against the full blue triangle. -/
-def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration)
+def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration E)
     (redLabel : SixPointLabel) (hredLabel : redLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -200,7 +202,7 @@ def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration)
 
 /-- The radius at the red root is the split variable. -/
 @[simp] theorem redRootEdgeBlueTrianglePacking_radius_root
-    (configuration : SixPointConfiguration) (redLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (redLabel : SixPointLabel)
     (hredLabel : redLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -214,7 +216,7 @@ def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration)
 
 /-- The radius at the selected red child is the complementary split. -/
 @[simp] theorem redRootEdgeBlueTrianglePacking_radius_child
-    (configuration : SixPointConfiguration) (redLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (redLabel : SixPointLabel)
     (hredLabel : redLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -228,7 +230,7 @@ def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration)
 
 /-- Blue radii in a red root-edge packing are the canonical triangle radii. -/
 @[simp] theorem redRootEdgeBlueTrianglePacking_radius_blue
-    (configuration : SixPointConfiguration) (redLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (redLabel : SixPointLabel)
     (hredLabel : redLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -245,7 +247,7 @@ def redRootEdgeBlueTrianglePacking (configuration : SixPointConfiguration)
 
 /-- The total radius of a red root-edge packing is its edge length plus a semiperimeter. -/
 theorem redRootEdgeBlueTrianglePacking_totalRadius
-    (configuration : SixPointConfiguration) (redLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (redLabel : SixPointLabel)
     (hredLabel : redLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -280,20 +282,20 @@ theorem redRootEdgeBlueTrianglePacking_totalRadius
         ring
 
 /-- Cross reach from the red root to a labelled blue triangle ball. -/
-def redRootBlueTriangleReach (configuration : SixPointConfiguration)
+def redRootBlueTriangleReach (configuration : SixPointConfiguration E)
     (label : SixPointLabel) : ℝ :=
   dist (configuration .red .root) (configuration .blue label) +
     canonicalTriangleRadius (configuration .blue .root) (configuration .blue .left)
       (configuration .blue .right) label
 
 /-- Cross reach from a red child to a labelled blue triangle ball. -/
-def redChildBlueTriangleReach (configuration : SixPointConfiguration)
+def redChildBlueTriangleReach (configuration : SixPointConfiguration E)
     (redLabel blueLabel : SixPointLabel) : ℝ :=
   dist (configuration .red redLabel) (configuration .blue blueLabel) +
     canonicalTriangleRadius (configuration .blue .root) (configuration .blue .left)
       (configuration .blue .right) blueLabel
 
-private theorem same_color_pair_le_twice_bound {configuration : SixPointConfiguration}
+private theorem same_color_pair_le_twice_bound {configuration : SixPointConfiguration E}
     (packing : SixPointPacking configuration) (i j : packing.support)
     (hcolor : i.1.1 = j.1.1) {bound : ℝ} (hbound : 1 ≤ bound)
     (hdist : dist (configuration i.1.1 i.1.2) (configuration j.1.1 j.1.2) ≤ bound) :
@@ -307,7 +309,7 @@ private theorem same_color_pair_le_twice_bound {configuration : SixPointConfigur
 
 /-- The virtual diameter of supports `37` and `57` is the root-edge split diameter. -/
 theorem redRootEdgeBlueTrianglePacking_virtualDiameter
-    (configuration : SixPointConfiguration) (redLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (redLabel : SixPointLabel)
     (hredLabel : redLabel ≠ .root) {R M x : ℝ}
     (hRdist : dist (configuration .red .root) (configuration .red redLabel) = R)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
@@ -466,7 +468,7 @@ theorem redRootEdgeBlueTrianglePacking_virtualDiameter
     exact ⟨hdiameterM, hdiameterRoot, hdiameterChild⟩
 
 /-- Supports `73` and `75`: a blue root--child edge against the full red triangle. -/
-def blueRootEdgeRedTrianglePacking (configuration : SixPointConfiguration)
+def blueRootEdgeRedTrianglePacking (configuration : SixPointConfiguration E)
     (blueLabel : SixPointLabel) (hblueLabel : blueLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .blue .root) (configuration .blue blueLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -525,7 +527,7 @@ def blueRootEdgeRedTrianglePacking (configuration : SixPointConfiguration)
 
 /-- The total radius of a blue root-edge packing is its edge length plus a semiperimeter. -/
 theorem blueRootEdgeRedTrianglePacking_totalRadius
-    (configuration : SixPointConfiguration) (blueLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (blueLabel : SixPointLabel)
     (hblueLabel : blueLabel ≠ .root) {R x : ℝ}
     (hRdist : dist (configuration .blue .root) (configuration .blue blueLabel) = R)
     (hR_one : R ≤ 1) (hx_zero : 0 ≤ x) (hx_R : x ≤ R)
@@ -560,14 +562,14 @@ theorem blueRootEdgeRedTrianglePacking_totalRadius
         ring
 
 /-- Cross reach from the blue root to a labelled red triangle ball. -/
-def blueRootRedTriangleReach (configuration : SixPointConfiguration)
+def blueRootRedTriangleReach (configuration : SixPointConfiguration E)
     (label : SixPointLabel) : ℝ :=
   dist (configuration .blue .root) (configuration .red label) +
     canonicalTriangleRadius (configuration .red .root) (configuration .red .left)
       (configuration .red .right) label
 
 /-- Cross reach from a blue child to a labelled red triangle ball. -/
-def blueChildRedTriangleReach (configuration : SixPointConfiguration)
+def blueChildRedTriangleReach (configuration : SixPointConfiguration E)
     (blueLabel redLabel : SixPointLabel) : ℝ :=
   dist (configuration .blue blueLabel) (configuration .red redLabel) +
     canonicalTriangleRadius (configuration .red .root) (configuration .red .left)
@@ -575,7 +577,7 @@ def blueChildRedTriangleReach (configuration : SixPointConfiguration)
 
 /-- The virtual diameter of supports `73` and `75` is the root-edge split diameter. -/
 theorem blueRootEdgeRedTrianglePacking_virtualDiameter
-    (configuration : SixPointConfiguration) (blueLabel : SixPointLabel)
+    (configuration : SixPointConfiguration E) (blueLabel : SixPointLabel)
     (hblueLabel : blueLabel ≠ .root) {R L x : ℝ}
     (hRdist : dist (configuration .blue .root) (configuration .blue blueLabel) = R)
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
@@ -1207,7 +1209,8 @@ theorem blueRootEdgeInternalSlack_neg {E : Type*} [NormedAddCommGroup E]
 /-- In an admissible configuration, a diagonal matching and its red coincident endpoint rule out
 the red root-edge internal primitive. -/
 theorem SixPointConfiguration.redRootEdgeInternalSlack_neg_of_matching_endpoint
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : 0 ≤ matchingFailureSlack barC
       (dist (configuration .red .left) (configuration .red .right))
       (dist (configuration .blue .left) (configuration .blue .right))

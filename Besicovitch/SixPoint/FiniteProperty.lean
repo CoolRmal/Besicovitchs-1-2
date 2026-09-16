@@ -20,14 +20,17 @@ noncomputable section
 
 namespace Besicovitch
 
-/-- Every admissible configuration at `s` has a compactified packing of nonnegative score. -/
-def SixPointFiniteProperty (s : ℝ) : Prop :=
-  ∀ configuration : SixPointConfiguration, configuration.IsAdmissibleAt s →
+/-- Every admissible configuration in `E` at `s` has a compactified packing of nonnegative
+score. -/
+def SixPointFiniteProperty (E : Type*) [PseudoMetricSpace E] (s : ℝ) : Prop :=
+  ∀ configuration : SixPointConfiguration E, configuration.IsAdmissibleAt s →
     ∃ packing : SixPointPacking configuration, 0 ≤ packing.score s
+
+variable {E : Type*} [PseudoMetricSpace E]
 
 namespace SixPointPacking
 
-variable {configuration : SixPointConfiguration} (packing : SixPointPacking configuration)
+variable {configuration : SixPointConfiguration E} (packing : SixPointPacking configuration)
 
 /-- A packing is genuine when every radius on its support is positive. -/
 def HasPositiveRadii : Prop :=

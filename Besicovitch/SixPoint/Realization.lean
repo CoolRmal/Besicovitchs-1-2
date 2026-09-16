@@ -23,13 +23,15 @@ open scoped BigOperators
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 namespace SixPointPacking
 
-variable {normalized physical : SixPointConfiguration}
+variable {normalized physical : SixPointConfiguration E}
 
 /-- The physical union of balls obtained from a normalized packing at a given scale. -/
-def ballUnionAt (packing : SixPointPacking normalized) (physical : SixPointConfiguration)
-    (scale : ℝ) : Set (EuclideanSpace ℝ (Fin 2)) :=
+def ballUnionAt (packing : SixPointPacking normalized) (physical : SixPointConfiguration E)
+    (scale : ℝ) : Set E :=
   finiteBallUnion packing.support
     (fun i ↦ physical i.1.1 i.1.2) (fun i ↦ scale * packing.radius i)
 
@@ -41,13 +43,13 @@ theorem sum_radiusAt (packing : SixPointPacking normalized) (scale : ℝ) :
 
 /-- The physical ball union is open. -/
 theorem isOpen_ballUnionAt (packing : SixPointPacking normalized)
-    (physical : SixPointConfiguration) (scale : ℝ) :
+    (physical : SixPointConfiguration E) (scale : ℝ) :
     IsOpen (packing.ballUnionAt physical scale) :=
   isOpen_finiteBallUnion _ _
 
 /-- Exact scaling of center distances bounds the diameter of the physical ball union. -/
 theorem ediam_ballUnionAt_le (packing : SixPointPacking normalized)
-    (physical : SixPointConfiguration) {scale : ℝ} (hscale : 0 ≤ scale)
+    (physical : SixPointConfiguration E) {scale : ℝ} (hscale : 0 ≤ scale)
     (hdistance : ∀ i j : packing.support,
       dist (physical i.1.1 i.1.2) (physical j.1.1 j.1.2) =
         scale * dist (normalized i.1.1 i.1.2) (normalized j.1.1 j.1.2)) :
@@ -76,7 +78,7 @@ theorem ediam_ballUnionAt_le (packing : SixPointPacking normalized)
 
 /-- Same-color physical balls remain disjoint under exact distance scaling. -/
 theorem disjoint_ballAt (packing : SixPointPacking normalized)
-    (physical : SixPointConfiguration) {scale : ℝ} (hscale : 0 ≤ scale)
+    (physical : SixPointConfiguration E) {scale : ℝ} (hscale : 0 ≤ scale)
     (hdistance : ∀ i j : packing.support,
       dist (physical i.1.1 i.1.2) (physical j.1.1 j.1.2) =
         scale * dist (normalized i.1.1 i.1.2) (normalized j.1.1 j.1.2))

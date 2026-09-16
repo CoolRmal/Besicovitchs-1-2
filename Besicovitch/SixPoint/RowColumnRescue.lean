@@ -26,6 +26,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 private def rowRho1 : ℝ := 361 / 125
 
 private def rowRho2 : ℝ := 64 / 25
@@ -388,7 +390,7 @@ theorem row_obstruction_excludes_root_triangle_endpoint {E : Type*} [NormedAddCo
   nlinarith
 
 /-- Support `17`: the red root of radius one against the canonical blue triangle. -/
-def redRootBlueTrianglePacking (configuration : SixPointConfiguration)
+def redRootBlueTrianglePacking (configuration : SixPointConfiguration E)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
     (hblueRight : dist (configuration .blue .root) (configuration .blue .right) ≤ 1) :
     SixPointPacking configuration where
@@ -437,7 +439,7 @@ def redRootBlueTrianglePacking (configuration : SixPointConfiguration)
       · exact (hij (Subtype.ext rfl)).elim
 
 /-- Support `71`: the blue root of radius one against the canonical red triangle. -/
-def blueRootRedTrianglePacking (configuration : SixPointConfiguration)
+def blueRootRedTrianglePacking (configuration : SixPointConfiguration E)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
     (hredRight : dist (configuration .red .root) (configuration .red .right) ≤ 1) :
     SixPointPacking configuration where
@@ -486,7 +488,7 @@ def blueRootRedTrianglePacking (configuration : SixPointConfiguration)
       · simp at hi
 
 /-- The total radius of support `17` is one plus the blue semiperimeter. -/
-theorem redRootBlueTrianglePacking_totalRadius (configuration : SixPointConfiguration)
+theorem redRootBlueTrianglePacking_totalRadius (configuration : SixPointConfiguration E)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
     (hblueRight : dist (configuration .blue .root) (configuration .blue .right) ≤ 1) :
     (redRootBlueTrianglePacking configuration hblueLeft hblueRight).totalRadius =
@@ -513,7 +515,7 @@ theorem redRootBlueTrianglePacking_totalRadius (configuration : SixPointConfigur
       ring
 
 /-- The total radius of support `71` is one plus the red semiperimeter. -/
-theorem blueRootRedTrianglePacking_totalRadius (configuration : SixPointConfiguration)
+theorem blueRootRedTrianglePacking_totalRadius (configuration : SixPointConfiguration E)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
     (hredRight : dist (configuration .red .root) (configuration .red .right) ≤ 1) :
     (blueRootRedTrianglePacking configuration hredLeft hredRight).totalRadius =
@@ -544,14 +546,15 @@ private def trianglePoint {X : Type*} (root left right : X) : SixPointLabel → 
   | .left => left
   | .right => right
 
-@[simp] private theorem trianglePoint_configuration (configuration : SixPointConfiguration)
+omit [NormedAddCommGroup E] in
+@[simp] private theorem trianglePoint_configuration (configuration : SixPointConfiguration E)
     (color : SixPointColor) (label : SixPointLabel) :
     trianglePoint (configuration color .root) (configuration color .left)
       (configuration color .right) label = configuration color label := by
   cases label <;> rfl
 
 private theorem redRootBlueTrianglePacking_radius_blue
-    (configuration : SixPointConfiguration)
+    (configuration : SixPointConfiguration E)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
     (hblueRight : dist (configuration .blue .root) (configuration .blue .right) ≤ 1)
     (label : SixPointLabel)
@@ -564,7 +567,7 @@ private theorem redRootBlueTrianglePacking_radius_blue
   cases label <;> rfl
 
 private theorem blueRootRedTrianglePacking_radius_red
-    (configuration : SixPointConfiguration)
+    (configuration : SixPointConfiguration E)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
     (hredRight : dist (configuration .red .root) (configuration .red .right) ≤ 1)
     (label : SixPointLabel)
@@ -612,7 +615,7 @@ private theorem canonicalTriangle_pair_le {X : Type*} [PseudoMetricSpace X]
   · simp only [trianglePoint, dist_self, zero_add]
     nlinarith [canonicalTriangleRadius_le_one root left right hleft hright .right]
 
-private theorem triangle_pair_dist_le (configuration : SixPointConfiguration)
+private theorem triangle_pair_dist_le (configuration : SixPointConfiguration E)
     (color : SixPointColor)
     (hleft : dist (configuration color .root) (configuration color .left) ≤ 1)
     (hright : dist (configuration color .root) (configuration color .right) ≤ 1)
@@ -635,7 +638,7 @@ private theorem triangle_pair_dist_le (configuration : SixPointConfiguration)
   · simpa only [dist_comm] using htargetSibling
   · simpa using le_trans (by norm_num : (0 : ℝ) ≤ 2) htargetTwo
 
-private theorem red_root_blue_triangle_cross_le (configuration : SixPointConfiguration)
+private theorem red_root_blue_triangle_cross_le (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) {target : ℝ}
     (hroot : 2 +
       (dist (configuration .blue .root) (configuration .blue .left) +
@@ -665,7 +668,7 @@ private theorem red_root_blue_triangle_cross_le (configuration : SixPointConfigu
   · simp only [canonicalTriangleRadius, configuration.dist_red_blue_eq_norm]
     simpa only [SixPointConfiguration.redDisplacement, sub_self, sub_zero] using hright
 
-private theorem blue_root_red_triangle_cross_le (configuration : SixPointConfiguration)
+private theorem blue_root_red_triangle_cross_le (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) {target : ℝ}
     (hroot : 2 +
       (dist (configuration .red .root) (configuration .red .left) +
@@ -696,7 +699,7 @@ private theorem blue_root_red_triangle_cross_le (configuration : SixPointConfigu
     simpa only [SixPointConfiguration.bluePullback, sub_self, sub_zero] using hright
 
 private theorem redRootBlueTrianglePacking_virtualDiameter_le
-    (configuration : SixPointConfiguration)
+    (configuration : SixPointConfiguration E)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
     (hblueRight : dist (configuration .blue .root) (configuration .blue .right) ≤ 1)
     {target : ℝ} (hroot : 2 ≤ target)
@@ -728,12 +731,18 @@ private theorem redRootBlueTrianglePacking_virtualDiameter_le
       · simp [packing, redRootBlueTrianglePacking] at hleft
     · cases rightLabel
       · cases leftLabel
-        · simpa [packing, redRootBlueTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .root
-        · simpa [packing, redRootBlueTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .left
-        · simpa [packing, redRootBlueTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .right
+        · have h := hcross .root
+          simp only [packing, redRootBlueTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
+        · have h := hcross .left
+          simp only [packing, redRootBlueTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
+        · have h := hcross .right
+          simp only [packing, redRootBlueTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
       · simp [packing, redRootBlueTrianglePacking] at hright
       · simp [packing, redRootBlueTrianglePacking] at hright
     · let hdist : ∀ leftLabel rightLabel,
@@ -759,7 +768,7 @@ private theorem redRootBlueTrianglePacking_virtualDiameter_le
   exact hpair i j
 
 private theorem blueRootRedTrianglePacking_virtualDiameter_le
-    (configuration : SixPointConfiguration)
+    (configuration : SixPointConfiguration E)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
     (hredRight : dist (configuration .red .root) (configuration .red .right) ≤ 1)
     {target : ℝ} (hroot : 2 ≤ target)
@@ -795,12 +804,18 @@ private theorem blueRootRedTrianglePacking_virtualDiameter_le
           (configuration .red .right) hredLeft hredRight hroot hdist leftLabel rightLabel
     · cases rightLabel
       · cases leftLabel
-        · simpa [packing, blueRootRedTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .root
-        · simpa [packing, blueRootRedTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .left
-        · simpa [packing, blueRootRedTrianglePacking, dist_comm, add_comm, add_left_comm]
-            using hcross .right
+        · have h := hcross .root
+          simp only [packing, blueRootRedTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
+        · have h := hcross .left
+          simp only [packing, blueRootRedTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
+        · have h := hcross .right
+          simp only [packing, blueRootRedTrianglePacking] at h ⊢
+          rw [dist_comm] at h
+          linarith
       · simp [packing, blueRootRedTrianglePacking] at hright
       · simp [packing, blueRootRedTrianglePacking] at hright
     · cases leftLabel
@@ -869,8 +884,8 @@ private theorem root_triangle_target_bounds {E : Type*} [NormedAddCommGroup E]
   exact ⟨htargetTwo, htargetM, by nlinarith [barC_row_rescue_gaps.2.1],
     by nlinarith, by nlinarith⟩
 
-private theorem row_obstruction_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+private theorem row_obstruction_endpoint_bounds [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (redLabel : SixPointLabel) (hredLabel : redLabel ≠ .root)
     (hrow :
       2 + 2 * (barC - 1) *
@@ -915,8 +930,8 @@ private theorem row_obstruction_endpoint_bounds
     row_obstruction_excludes_root_triangle_endpoint _ p _ _ he hp hw₂ hw₁
       (by simpa [norm_sub_rev] using hM) (by simpa [add_comm] using hrowVector)⟩
 
-private theorem column_obstruction_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+private theorem column_obstruction_endpoint_bounds [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (blueLabel : SixPointLabel) (hblueLabel : blueLabel ≠ .root)
     (hcolumn :
       2 + 2 * (barC - 1) *
@@ -975,7 +990,7 @@ private theorem column_obstruction_endpoint_bounds
       (by simpa [norm_sub_rev] using hM) (by simpa [add_comm] using hcolumnVector)⟩
 
 private theorem red_root_blue_triangle_target_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.bluePullback .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.bluePullback .left‖ + barC) +
@@ -1026,7 +1041,7 @@ private theorem red_root_blue_triangle_target_bounds
     hw₁ hw₂ hM hleft hright
 
 private theorem redRootBlueTrianglePacking_virtualDiameter_le_of_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.bluePullback .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.bluePullback .left‖ + barC) +
@@ -1062,7 +1077,7 @@ private theorem redRootBlueTrianglePacking_virtualDiameter_le_of_endpoint_bounds
     htargetTwo hblue hcross
 
 private theorem redRootBlueTriangle_score_nonnegative_of_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.bluePullback .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.bluePullback .left‖ + barC) +
@@ -1084,7 +1099,7 @@ private theorem redRootBlueTriangle_score_nonnegative_of_endpoint_bounds
   simpa only [mul_comm] using hvirtual
 
 private theorem blue_root_red_triangle_target_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.redDisplacement .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.redDisplacement .left‖ + barC) +
@@ -1135,7 +1150,7 @@ private theorem blue_root_red_triangle_target_bounds
     hw₁ hw₂ hM hleft hright
 
 private theorem blueRootRedTrianglePacking_virtualDiameter_le_of_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.redDisplacement .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.redDisplacement .left‖ + barC) +
@@ -1171,7 +1186,7 @@ private theorem blueRootRedTrianglePacking_virtualDiameter_le_of_endpoint_bounds
     htargetTwo hred hcross
 
 private theorem blueRootRedTriangle_score_nonnegative_of_endpoint_bounds
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hleft :
       ‖configuration.rootDisplacement - configuration.redDisplacement .left‖ < barC - 1 +
         ((barC - 1) * (‖configuration.redDisplacement .left‖ + barC) +
@@ -1193,8 +1208,8 @@ private theorem blueRootRedTriangle_score_nonnegative_of_endpoint_bounds
   simpa only [mul_comm] using hvirtual
 
 /-- A row obstruction makes support `17` a nonnegative-score endpoint packing. -/
-theorem red_root_blue_triangle_score_nonnegative_of_row_obstruction
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+theorem red_root_blue_triangle_score_nonnegative_of_row_obstruction [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (redLabel : SixPointLabel) (hredLabel : redLabel ≠ .root)
     (hrow :
       2 + 2 * (barC - 1) *
@@ -1211,8 +1226,8 @@ theorem red_root_blue_triangle_score_nonnegative_of_row_obstruction
   exact redRootBlueTriangle_score_nonnegative_of_endpoint_bounds configuration h hleft hright
 
 /-- A column obstruction makes support `71` a nonnegative-score endpoint packing. -/
-theorem blue_root_red_triangle_score_nonnegative_of_column_obstruction
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+theorem blue_root_red_triangle_score_nonnegative_of_column_obstruction [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (blueLabel : SixPointLabel) (hblueLabel : blueLabel ≠ .root)
     (hcolumn :
       2 + 2 * (barC - 1) *

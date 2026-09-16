@@ -27,6 +27,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- Failure slack of the crossed `(1,2)` term for a red root--second-child edge. -/
 def redRootEdgeType12Slack
     (c M r₂ b₁ b₂ rootToBlueFirst secondCross : ℝ) : ℝ :=
@@ -615,7 +617,8 @@ theorem redRootEdgeType12Slack_neg {E : Type*} [NormedAddCommGroup E]
 /-- In an admissible configuration, the selected matching and endpoint code `0` exclude the
 red crossed `(left,right)` root--edge term. -/
 theorem SixPointConfiguration.redRootEdgeType12Slack_neg_of_matching_endpoint
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hendpoint : redSiblingTriangleFailure configuration (.endpoint 0)) :
     redRootEdgeType12Slack barC

@@ -29,7 +29,10 @@ open scoped BigOperators ENNReal
 
 namespace Besicovitch
 
-private theorem SixPointConfiguration.dist_root_le_one {configuration : SixPointConfiguration}
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E]
+
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
+private theorem SixPointConfiguration.dist_root_le_one {configuration : SixPointConfiguration E}
     {s : ℝ} (h : configuration.IsAdmissibleAt s) (color : SixPointColor)
     (label : SixPointLabel) :
     dist (configuration color .root) (configuration color label) ≤ 1 := by
@@ -38,8 +41,9 @@ private theorem SixPointConfiguration.dist_root_le_one {configuration : SixPoint
   · exact h.child_distance color .left (by simp)
   · exact h.child_distance color .right (by simp)
 
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
 private theorem SixPointConfiguration.dist_roots_le_one
-    {configuration : SixPointConfiguration} {s : ℝ} (h : configuration.IsAdmissibleAt s)
+    {configuration : SixPointConfiguration E} {s : ℝ} (h : configuration.IsAdmissibleAt s)
     (color₁ color₂ : SixPointColor) :
     dist (configuration color₁ .root) (configuration color₂ .root) ≤ 1 := by
   cases color₁ <;> cases color₂
@@ -48,8 +52,9 @@ private theorem SixPointConfiguration.dist_roots_le_one
   · simpa [dist_comm] using h.root_distance.le
   · simp
 
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
 private theorem SixPointConfiguration.dist_le_three
-    {configuration : SixPointConfiguration} {s : ℝ} (h : configuration.IsAdmissibleAt s)
+    {configuration : SixPointConfiguration E} {s : ℝ} (h : configuration.IsAdmissibleAt s)
     (color₁ color₂ : SixPointColor) (label₁ label₂ : SixPointLabel) :
     dist (configuration color₁ label₁) (configuration color₂ label₂) ≤ 3 := by
   calc
@@ -65,8 +70,9 @@ private theorem SixPointConfiguration.dist_le_three
       · exact SixPointConfiguration.dist_root_le_one h color₂ label₂
     _ = 3 := by norm_num
 
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
 private theorem SixPointPacking.virtualDiameter_le_five
-    {configuration : SixPointConfiguration} {s : ℝ} (packing : SixPointPacking configuration)
+    {configuration : SixPointConfiguration E} {s : ℝ} (packing : SixPointPacking configuration)
     (h : configuration.IsAdmissibleAt s) : packing.virtualDiameter ≤ 5 := by
   unfold SixPointPacking.virtualDiameter
   apply Finset.sup'_le
@@ -103,10 +109,11 @@ private theorem root_leakage_real_bound {beta gamma q d length tau : ℝ} (hq : 
     lt_of_lt_of_eq (mul_lt_mul_of_pos_right htau_gap hd) (by ring)
   nlinarith
 
+omit [NormedSpace ℝ E] [BorelSpace E] in
 private theorem measure_rootBallUnion_sdiff_le
-    {mu : Measure (EuclideanSpace ℝ (Fin 2))}
-    {outside : Set (EuclideanSpace ℝ (Fin 2))}
-    {x y : (EuclideanSpace ℝ (Fin 2))} {beta gamma q d length tau : ℝ}
+    {mu : Measure E}
+    {outside : Set E}
+    {x y : E} {beta gamma q d length tau : ℝ}
     (hq : 0 < q) (hq_one : q < 1)
     (hgamma : gamma < beta) (hd : 0 < d) (hd_length : d ≤ length)
     (hlength_eq : dist x y = length) (hlength : length < d / q)
@@ -123,7 +130,8 @@ private theorem measure_rootBallUnion_sdiff_le
     _ ≤ _ := ENNReal.ofReal_le_ofReal <|
       root_leakage_real_bound hq hq_one hgamma hd hd_length hlength htau_le
 
-private theorem exists_approximate_roots {e₁ e₂ : Set (EuclideanSpace ℝ (Fin 2))} {d q : ℝ}
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
+private theorem exists_approximate_roots {e₁ e₂ : Set E} {d q : ℝ}
     (he₁ : e₁.Nonempty) (he₂ : e₂.Nonempty) (hd : 0 < d) (hq : 0 < q)
     (hq_one : q < 1) (hd_set : d = (setEDist e₁ e₂).toReal) :
     ∃ x ∈ e₁, ∃ y ∈ e₂, d ≤ dist x y ∧ dist x y < d / q := by
@@ -152,9 +160,10 @@ private theorem leakage_factor_lt_of_score {total diameter beta margin tau : ℝ
   have hgap := score_gap_lt hbeta hscore
   nlinarith
 
-private theorem configuration_of_children {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
-    (root : SixPointColor → (EuclideanSpace ℝ (Fin 2))) {d gamma : ℝ}
-    {redLeft redRight blueLeft blueRight : (EuclideanSpace ℝ (Fin 2))}
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
+private theorem configuration_of_children {e : SixPointColor → Set E}
+    (root : SixPointColor → E) {d gamma : ℝ}
+    {redLeft redRight blueLeft blueRight : E}
     (hroot : ∀ color, root color ∈ e color)
     (hredLeft : redLeft ∈ e .red ∩ Metric.ball (root .red) d)
     (hredRight : redRight ∈ e .red ∩ Metric.ball (root .red) d)
@@ -162,7 +171,7 @@ private theorem configuration_of_children {e : SixPointColor → Set (EuclideanS
     (hblueRight : blueRight ∈ e .blue ∩ Metric.ball (root .blue) d)
     (hredSibling : 2 * gamma * d < dist redLeft redRight)
     (hblueSibling : 2 * gamma * d < dist blueLeft blueRight) :
-    ∃ configuration : SixPointConfiguration,
+    ∃ configuration : SixPointConfiguration E,
       configuration .red .root = root .red ∧ configuration .blue .root = root .blue ∧
         (∀ color label, configuration color label ∈ e color) ∧
         (∀ color label, label ≠ .root →
@@ -191,20 +200,21 @@ private theorem configuration_of_children {e : SixPointColor → Set (EuclideanS
     · exact hredSibling
     · exact hblueSibling
 
+omit [NormedSpace ℝ E] in
 private theorem exists_physical_configuration
-    {mu : Measure (EuclideanSpace ℝ (Fin 2))} (hmu : IsStraightMeasure mu)
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
+    {mu : Measure E} (hmu : IsStraightMeasure mu)
+    {e : SixPointColor → Set E}
     (hmeasurable : ∀ color, MeasurableSet (e color))
     (hnonempty : ∀ color, (e color).Nonempty) {beta gamma d : ℝ} (hd : 0 < d)
     (hgamma_pos : 0 < gamma) (hgamma : gamma < beta)
     (hdistance : d = (setEDist (e .red) (e .blue)).toReal)
-    (root : SixPointColor → (EuclideanSpace ℝ (Fin 2)))
+    (root : SixPointColor → E)
     (hroot : ∀ color, root color ∈ e color)
     (hdensity : ∀ color,
       ENNReal.ofReal (2 * beta * d) < mu (Metric.ball (root color) d))
     (hleakage : mu (rootBallUnion (root .red) (root .blue) d \ (e .red ∪ e .blue)) ≤
       ENNReal.ofReal (2 * (beta - gamma) * d)) :
-    ∃ configuration : SixPointConfiguration,
+    ∃ configuration : SixPointConfiguration E,
       configuration .red .root = root .red ∧ configuration .blue .root = root .blue ∧
         (∀ color label, configuration color label ∈ e color) ∧
         (∀ color label, label ≠ .root →
@@ -242,8 +252,9 @@ private theorem exists_physical_configuration
   exact configuration_of_children root hroot hredLeft hredRight hblueLeft hblueRight
     hredSibling hblueSibling
 
-private theorem exists_uniform_positive_packing {configuration : SixPointConfiguration}
-    {s beta q₀ q : ℝ} (hfinite : SixPointFiniteProperty s) (hs : 0 < s)
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
+private theorem exists_uniform_positive_packing {configuration : SixPointConfiguration E}
+    {s beta q₀ q : ℝ} (hfinite : SixPointFiniteProperty E s) (hs : 0 < s)
     (hbeta : 0 < beta) (hq₀ : 0 < q₀) (hq₀q : q₀ < q) (hq_one : q ≤ 1)
     (hgain₀ : s < beta * q₀)
     (hadmissible : configuration.IsAdmissibleAt s)
@@ -273,9 +284,10 @@ private theorem exists_uniform_positive_packing {configuration : SixPointConfigu
     nlinarith [mul_pos hq₀ hden]
   exact scaled.exists_positiveRadii_score_gt hbeta hq hq_one hcap hscore_scaled
 
-private theorem normalized_admissible_and_cross {physical : SixPointConfiguration}
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
-    {s q₀ gamma d length q : ℝ} {origin : (EuclideanSpace ℝ (Fin 2))}
+omit [MeasurableSpace E] [BorelSpace E] in
+private theorem normalized_admissible_and_cross {physical : SixPointConfiguration E}
+    {e : SixPointColor → Set E}
+    {s q₀ gamma d length q : ℝ} {origin : E}
     (hlength : 0 < length) (hq_eq : q = d / length) (hq₀q : q₀ < q) (hq_one : q ≤ 1)
     (hgamma : 0 < gamma) (hs_gamma : s < gamma * q₀)
     (hroot : dist (physical .red .root) (physical .blue .root) = length)
@@ -304,9 +316,10 @@ private theorem normalized_admissible_and_cross {physical : SixPointConfiguratio
     exact hd_set.trans_le <| setEDist_toReal_le_dist (hnonempty .red) (hnonempty .blue)
       (hcenter .red redLabel) (hcenter .blue blueLabel)
 
+omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
 private theorem SixPointPacking.ballUnionAt_inter_nonempty
-    {normalized physical : SixPointConfiguration} (packing : SixPointPacking normalized)
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))} {length : ℝ} (hlength : 0 < length)
+    {normalized physical : SixPointConfiguration E} (packing : SixPointPacking normalized)
+    {e : SixPointColor → Set E} {length : ℝ} (hlength : 0 < length)
     (hpositive : packing.HasPositiveRadii)
     (hcenter : ∀ color label, physical color label ∈ e color) (color : SixPointColor) :
     (packing.ballUnionAt physical length ∩ e color).Nonempty := by
@@ -315,9 +328,10 @@ private theorem SixPointPacking.ballUnionAt_inter_nonempty
   refine ⟨physical color label, ?_, hcenter color label⟩
   exact mem_finiteBallUnion.mpr ⟨i, Metric.mem_ball_self (mul_pos hlength (hpositive i))⟩
 
-private theorem packing_leakage_gt {normalized physical : SixPointConfiguration}
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
-    {mu : Measure (EuclideanSpace ℝ (Fin 2))}
+omit [NormedSpace ℝ E] in
+private theorem packing_leakage_gt {normalized physical : SixPointConfiguration E}
+    {e : SixPointColor → Set E}
+    {mu : Measure E}
     {s beta tau margin length d scale : ℝ}
     (hadmissible : normalized.IsAdmissibleAt s) (hmu : IsStraightMeasure mu)
     (hbeta : 0 < beta) (htau : 0 < tau) (htau_le : tau ≤ beta * margin / 10)
@@ -375,10 +389,11 @@ private theorem packing_leakage_gt {normalized physical : SixPointConfiguration}
     nlinarith
   exact (not_lt_of_ge hreal_measure.le) hreal_score
 
-private theorem exists_packing_neighborhood {normalized physical : SixPointConfiguration}
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
-    {mu : Measure (EuclideanSpace ℝ (Fin 2))}
-    {s beta q₀ q tau length d scale : ℝ} (hfinite : SixPointFiniteProperty s)
+omit [NormedSpace ℝ E] in
+private theorem exists_packing_neighborhood {normalized physical : SixPointConfiguration E}
+    {e : SixPointColor → Set E}
+    {mu : Measure E}
+    {s beta q₀ q tau length d scale : ℝ} (hfinite : SixPointFiniteProperty E s)
     (hs : 0 < s) (hbeta : 0 < beta) (hq₀ : 0 < q₀) (hq₀q : q₀ < q) (hq_one : q ≤ 1)
     (hgain₀ : s < beta * q₀) (htau : 0 < tau)
     (htau_score : tau ≤ beta * (q₀ * (beta * q₀ - s) / (4 * s * beta)) / 10)
@@ -394,7 +409,7 @@ private theorem exists_packing_neighborhood {normalized physical : SixPointConfi
         length * dist (normalized i.1 i.2) (normalized j.1 j.2))
     (hdensity : ∀ x ∈ e .red ∪ e .blue, ∀ r : ℝ, 0 < r → r < scale →
       ENNReal.ofReal (2 * beta * r) < mu (Metric.ball x r)) :
-    ∃ v : Set (EuclideanSpace ℝ (Fin 2)), IsOpen v ∧
+    ∃ v : Set E, IsOpen v ∧
       (v ∩ e .red).Nonempty ∧ (v ∩ e .blue).Nonempty ∧
       ENNReal.ofReal tau * Metric.ediam v < mu (v \ (e .red ∪ e .blue)) := by
   obtain ⟨packing, hpositive, hradius_q, hscore⟩ :=
@@ -416,9 +431,9 @@ private theorem exists_packing_neighborhood {normalized physical : SixPointConfi
       hnonempty hcenter hdistance hdensity packing hpositive hradius_d hscore
 
 private theorem exists_neighborhood_of_root_bound
-    {e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2))}
-    {mu : Measure (EuclideanSpace ℝ (Fin 2))} {s beta q₀ gamma tau scale d length q : ℝ}
-    (hfinite : SixPointFiniteProperty s) (hs : 0 < s) (hbeta : 0 < beta)
+    {e : SixPointColor → Set E}
+    {mu : Measure E} {s beta q₀ gamma tau scale d length q : ℝ}
+    (hfinite : SixPointFiniteProperty E s) (hs : 0 < s) (hbeta : 0 < beta)
     (hgain₀ : s < beta * q₀) (hq₀ : 0 < q₀) (hq₀q : q₀ < q) (hq_one : q ≤ 1)
     (hgamma : 0 < gamma) (hgamma_beta : gamma < beta)
     (hs_gamma : s < gamma * q₀) (htau : 0 < tau)
@@ -427,7 +442,7 @@ private theorem exists_neighborhood_of_root_bound
     (hnonempty : ∀ color, (e color).Nonempty) (hd : 0 < d) (hd_scale : d < scale)
     (hlength : 0 < length) (hq_eq : q = d / length)
     (hd_set : d = (setEDist (e .red) (e .blue)).toReal)
-    (root : SixPointColor → (EuclideanSpace ℝ (Fin 2)))
+    (root : SixPointColor → E)
     (hroot : ∀ color, root color ∈ e color)
     (hroot_length : dist (root .red) (root .blue) = length)
     (hdensity_root : ∀ color,
@@ -436,7 +451,7 @@ private theorem exists_neighborhood_of_root_bound
       ENNReal.ofReal (2 * (beta - gamma) * d))
     (hdensity : ∀ x ∈ e .red ∪ e .blue, ∀ r : ℝ, 0 < r → r < scale →
       ENNReal.ofReal (2 * beta * r) < mu (Metric.ball x r)) :
-    ∃ v : Set (EuclideanSpace ℝ (Fin 2)), IsOpen v ∧
+    ∃ v : Set E, IsOpen v ∧
       (v ∩ e .red).Nonempty ∧ (v ∩ e .blue).Nonempty ∧
       ENNReal.ofReal tau * Metric.ediam v < mu (v \ (e .red ∪ e .blue)) := by
   obtain ⟨physical, hphysical_red, hphysical_blue, hcenter, hchild, hsibling⟩ :=
@@ -453,22 +468,22 @@ private theorem exists_neighborhood_of_root_bound
     exact physical.dist_eq_scale_mul_dist_normalize (root .red) hlength i.1 j.1 i.2 j.2
   · exact hdensity
 
-private theorem exists_pair_neighborhood {mu : Measure (EuclideanSpace ℝ (Fin 2))}
-    {s beta q₀ gamma tau scale : ℝ} (hfinite : SixPointFiniteProperty s) (hs : 0 < s)
+private theorem exists_pair_neighborhood {mu : Measure E}
+    {s beta q₀ gamma tau scale : ℝ} (hfinite : SixPointFiniteProperty E s) (hs : 0 < s)
     (hbeta : 0 < beta) (hgain₀ : s < beta * q₀) (hq₀ : 0 < q₀) (hq₀_one : q₀ < 1)
     (hgamma : 0 < gamma) (hgamma_beta : gamma < beta) (hs_gamma : s < gamma * q₀)
     (htau : 0 < tau) (htau_root : tau ≤ (beta - gamma) * q₀ / 4)
     (htau_score : tau ≤ beta * (q₀ * (beta * q₀ - s) / (4 * s * beta)) / 10)
-    (hmu : IsStraightMeasure mu) {e₁ e₂ : Set (EuclideanSpace ℝ (Fin 2))}
+    (hmu : IsStraightMeasure mu) {e₁ e₂ : Set E}
     (he₁ : MeasurableSet e₁) (he₂ : MeasurableSet e₂) (he₁_nonempty : e₁.Nonempty)
     (he₂_nonempty : e₂.Nonempty) (hset_pos : 0 < setEDist e₁ e₂)
     (hset_lt : setEDist e₁ e₂ < ENNReal.ofReal scale)
     (hdensity : ∀ x ∈ e₁ ∪ e₂, ∀ r : ℝ, 0 < r → r < scale →
       ENNReal.ofReal (2 * beta * r) < mu (Metric.ball x r)) :
-    ∃ v : Set (EuclideanSpace ℝ (Fin 2)), IsOpen v ∧
+    ∃ v : Set E, IsOpen v ∧
       (v ∩ e₁).Nonempty ∧ (v ∩ e₂).Nonempty ∧
       ENNReal.ofReal tau * Metric.ediam v < mu (v \ (e₁ ∪ e₂)) := by
-  let e : SixPointColor → Set (EuclideanSpace ℝ (Fin 2)) | .red => e₁ | .blue => e₂
+  let e : SixPointColor → Set E | .red => e₁ | .blue => e₂
   have he_nonempty : ∀ color, (e color).Nonempty := by
     intro color
     cases color <;> simp_all [e]
@@ -488,7 +503,7 @@ private theorem exists_pair_neighborhood {mu : Measure (EuclideanSpace ℝ (Fin 
   have hq₀q : q₀ < q := (lt_div_iff₀ hlength).2 <| by
     simpa [mul_comm] using (lt_div_iff₀ hq₀).1 hroot_length
   have hq_one : q ≤ 1 := (div_le_one hlength).2 hd_length
-  let root : SixPointColor → (EuclideanSpace ℝ (Fin 2)) | .red => redRoot | .blue => blueRoot
+  let root : SixPointColor → E | .red => redRoot | .blue => blueRoot
   let rootUnion := rootBallUnion redRoot blueRoot d
   by_cases hleakage : ENNReal.ofReal tau * Metric.ediam rootUnion <
       mu (rootUnion \ (e₁ ∪ e₂))
@@ -514,8 +529,8 @@ private theorem exists_pair_neighborhood {mu : Measure (EuclideanSpace ℝ (Fin 
 
 /-- The finite six-point property at `s` implies the Besicovitch pair condition above `s`. -/
 theorem SixPointFiniteProperty.besicovitchPairCondition {s beta : ℝ} (hs : 0 < s)
-    (hsbeta : s < beta) (hfinite : SixPointFiniteProperty s) :
-    BesicovitchPairCondition (EuclideanSpace ℝ (Fin 2)) beta := by
+    (hsbeta : s < beta) (hfinite : SixPointFiniteProperty E s) :
+    BesicovitchPairCondition E beta := by
   obtain ⟨q₀, gamma, hq₀, hq₀_one, hs_div, hgamma, hgamma_beta, hs_gamma⟩ :=
     exists_transfer_parameters hs hsbeta
   have hbeta : 0 < beta := hs.trans hsbeta

@@ -22,10 +22,12 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- Under the diagonal matching obstruction, the two sibling-triangle supports either win or
 produce one of the residual incidence outcomes. -/
-theorem exists_nonnegative_score_or_siblingIncidenceOutcome
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+theorem exists_nonnegative_score_or_siblingIncidenceOutcome [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     (∃ packing : SixPointPacking configuration, 0 ≤ packing.score barS) ∨
       SiblingIncidenceOutcome configuration := by
@@ -42,8 +44,8 @@ theorem exists_nonnegative_score_or_siblingIncidenceOutcome
       hscore⟩
 
 /-- The first two packing stages leave only a sibling incidence or the anti-diagonal matching. -/
-theorem exists_nonnegative_score_or_siblingIncidence_or_antiDiagonal
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS) :
+theorem exists_nonnegative_score_or_siblingIncidence_or_antiDiagonal [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS) :
     (∃ packing : SixPointPacking configuration, 0 ≤ packing.score barS) ∨
       SiblingIncidenceOutcome configuration ∨
       (2 * barC - 1) *

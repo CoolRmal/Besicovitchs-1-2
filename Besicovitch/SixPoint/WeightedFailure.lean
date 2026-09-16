@@ -23,21 +23,23 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- The weakened diagonal-matching slack `q1`. -/
-def firstActiveFailureSlack (configuration : SixPointConfiguration) : ℝ :=
+def firstActiveFailureSlack (configuration : SixPointConfiguration E) : ℝ :=
   dist (configuration .red .left) (configuration .blue .left) +
     dist (configuration .red .right) (configuration .blue .right) -
       2 * barC * (2 * barC - 1)
 
 /-- The coincident sibling-endpoint slack `q2`. -/
-def secondActiveFailureSlack (configuration : SixPointConfiguration) : ℝ :=
+def secondActiveFailureSlack (configuration : SixPointConfiguration E) : ℝ :=
   dist (configuration .red .left) (configuration .blue .left) -
     ((barC - 1) * matchedChildAverage configuration 0 +
       (barC + 1) * matchedChildAverage configuration 1 +
       3 * barC ^ 2 - 3 * barC + 2) / 2
 
 /-- The balanced root--edge slack `q3`. -/
-def thirdActiveFailureSlack (configuration : SixPointConfiguration) : ℝ :=
+def thirdActiveFailureSlack (configuration : SixPointConfiguration E) : ℝ :=
   (dist (configuration .red .left) (configuration .blue .root) +
       dist (configuration .red .root) (configuration .blue .left) +
       dist (configuration .red .left) (configuration .blue .right) +
@@ -47,7 +49,7 @@ def thirdActiveFailureSlack (configuration : SixPointConfiguration) : ℝ :=
 
 /-- The selected diagonal matching makes `q1` nonnegative. -/
 theorem firstActiveFailureSlack_nonneg
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     0 ≤ firstActiveFailureSlack configuration := by
   have hL := (sibling_distance_mem_endpoint_interval h .red).1
@@ -64,7 +66,7 @@ theorem firstActiveFailureSlack_nonneg
 
 /-- Coincident endpoint failures at `B11` make `q2` strictly positive. -/
 theorem secondActiveFailureSlack_pos
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hred : redSiblingTriangleFailure configuration (.endpoint 0))
     (hblue : blueSiblingTriangleFailure configuration (.endpoint 0)) :
     0 < secondActiveFailureSlack configuration := by
@@ -72,7 +74,7 @@ theorem secondActiveFailureSlack_pos
 
 /-- The two surviving `(1,1)` root--edge terms make `q3` strictly positive. -/
 theorem thirdActiveFailureSlack_pos
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hred : 2 * redRootEdgeTarget configuration <
       dist (configuration .red .root) (configuration .red .right) +
         redRootBlueTriangleReach configuration .left +
@@ -100,7 +102,7 @@ theorem thirdActiveFailureSlack_pos
 
 /-- The weighted score of the displacement pairs is exactly `q1 + lambda*q2 + mu*q3`. -/
 theorem weightedPairScore_configuration_eq_activeFailureCombination
-    (configuration : SixPointConfiguration) (lambda mu : ℝ) :
+    (configuration : SixPointConfiguration E) (lambda mu : ℝ) :
     weightedPairScore configuration.rootDisplacement barC lambda mu
         (configuration.redDisplacement .left) (configuration.redDisplacement .right)
         (configuration.bluePullback .left) (configuration.bluePullback .right) =
@@ -150,7 +152,7 @@ theorem weightedPairScore_configuration_eq_activeFailureCombination
   ring
 
 /-- Nonnegative active slacks make their exact weighted combination nonnegative. -/
-theorem activeFailureCombination_nonneg {configuration : SixPointConfiguration}
+theorem activeFailureCombination_nonneg {configuration : SixPointConfiguration E}
     {lambda mu : ℝ} (hlambda : 0 ≤ lambda) (hmu : 0 ≤ mu)
     (hq₁ : 0 ≤ firstActiveFailureSlack configuration)
     (hq₂ : 0 ≤ secondActiveFailureSlack configuration)
@@ -163,7 +165,7 @@ theorem activeFailureCombination_nonneg {configuration : SixPointConfiguration}
   linarith
 
 /-- Strict second and third failure slacks make their weighted combination positive. -/
-theorem activeFailureCombination_pos {configuration : SixPointConfiguration}
+theorem activeFailureCombination_pos {configuration : SixPointConfiguration E}
     {lambda mu : ℝ} (hlambda : 0 < lambda) (hmu : 0 < mu)
     (hq₁ : 0 ≤ firstActiveFailureSlack configuration)
     (hq₂ : 0 < secondActiveFailureSlack configuration)

@@ -19,17 +19,19 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
 namespace SixPointConfiguration
 
 /-- Translate a configuration by `origin` and divide all coordinates by `scale`. -/
-def normalize (configuration : SixPointConfiguration)
-    (origin : (EuclideanSpace ℝ (Fin 2))) (scale : ℝ) :
-    SixPointConfiguration :=
+def normalize (configuration : SixPointConfiguration E)
+    (origin : E) (scale : ℝ) :
+    SixPointConfiguration E :=
   fun color label ↦ scale⁻¹ • (configuration color label - origin)
 
 /-- Normalization by a positive scale divides every pairwise distance by that scale. -/
-theorem dist_normalize (configuration : SixPointConfiguration)
-    (origin : (EuclideanSpace ℝ (Fin 2))) {scale : ℝ}
+theorem dist_normalize (configuration : SixPointConfiguration E)
+    (origin : E) {scale : ℝ}
     (hscale : 0 < scale) (color₁ color₂ : SixPointColor) (label₁ label₂ : SixPointLabel) :
     dist (configuration.normalize origin scale color₁ label₁)
         (configuration.normalize origin scale color₂ label₂) =
@@ -37,8 +39,8 @@ theorem dist_normalize (configuration : SixPointConfiguration)
   simp [normalize, dist_smul₀, Real.norm_eq_abs, abs_of_pos hscale, div_eq_inv_mul]
 
 /-- Multiplying normalized distances by the positive scale recovers physical distances. -/
-theorem dist_eq_scale_mul_dist_normalize (configuration : SixPointConfiguration)
-    (origin : (EuclideanSpace ℝ (Fin 2))) {scale : ℝ} (hscale : 0 < scale)
+theorem dist_eq_scale_mul_dist_normalize (configuration : SixPointConfiguration E)
+    (origin : E) {scale : ℝ} (hscale : 0 < scale)
     (color₁ color₂ : SixPointColor) (label₁ label₂ : SixPointLabel) :
     dist (configuration color₁ label₁) (configuration color₂ label₂) =
       scale * dist (configuration.normalize origin scale color₁ label₁)
@@ -47,8 +49,8 @@ theorem dist_eq_scale_mul_dist_normalize (configuration : SixPointConfiguration)
   field_simp
 
 /-- Distance bounds at scale `scale` give an admissible normalized configuration. -/
-theorem isAdmissibleAt_normalize_of_distances (configuration : SixPointConfiguration)
-    (origin : (EuclideanSpace ℝ (Fin 2))) {scale d γ q s : ℝ} (hscale : 0 < scale)
+theorem isAdmissibleAt_normalize_of_distances (configuration : SixPointConfiguration E)
+    (origin : E) {scale d γ q s : ℝ} (hscale : 0 < scale)
     (hroot : dist (configuration .red .root) (configuration .blue .root) = scale)
     (hchild : ∀ color label, label ≠ .root →
       dist (configuration color .root) (configuration color label) ≤ d)

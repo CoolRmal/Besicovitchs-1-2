@@ -33,14 +33,16 @@ inductive SixPointLabel
 /-- A label for one of the six points. -/
 abbrev SixPointIndex := SixPointColor × SixPointLabel
 
-/-- A two-color six-point configuration in the Euclidean plane. -/
-abbrev SixPointConfiguration := SixPointColor → SixPointLabel → (EuclideanSpace ℝ (Fin 2))
+/-- A two-color six-point configuration in `E`. -/
+abbrev SixPointConfiguration (E : Type*) := SixPointColor → SixPointLabel → E
 
 namespace SixPointConfiguration
 
+variable {E : Type*}
+
 /-- The labelled configuration determined by two roots and two children of each color. -/
-def ofPoints (redRoot redLeft redRight blueRoot blueLeft blueRight : (EuclideanSpace ℝ (Fin 2))) :
-    SixPointConfiguration
+def ofPoints (redRoot redLeft redRight blueRoot blueLeft blueRight : E) :
+    SixPointConfiguration E
   | .red, .root => redRoot
   | .red, .left => redLeft
   | .red, .right => redRight
@@ -48,8 +50,10 @@ def ofPoints (redRoot redLeft redRight blueRoot blueLeft blueRight : (EuclideanS
   | .blue, .left => blueLeft
   | .blue, .right => blueRight
 
+variable [PseudoMetricSpace E]
+
 /-- A normalized configuration at separation parameter `s`. -/
-structure IsAdmissibleAt (configuration : SixPointConfiguration) (s : ℝ) : Prop where
+structure IsAdmissibleAt (configuration : SixPointConfiguration E) (s : ℝ) : Prop where
   root_distance : dist (configuration .red .root) (configuration .blue .root) = 1
   child_distance : ∀ color label, label ≠ .root →
     dist (configuration color .root) (configuration color label) ≤ 1
@@ -57,7 +61,7 @@ structure IsAdmissibleAt (configuration : SixPointConfiguration) (s : ℝ) : Pro
     2 * s ≤ dist (configuration color .left) (configuration color .right)
 
 /-- Raising the separation parameter only shrinks the admissible configuration class. -/
-theorem IsAdmissibleAt.mono {configuration : SixPointConfiguration} {s t : ℝ}
+theorem IsAdmissibleAt.mono {configuration : SixPointConfiguration E} {s t : ℝ}
     (hst : s ≤ t) (h : configuration.IsAdmissibleAt t) : configuration.IsAdmissibleAt s where
   root_distance := h.root_distance
   child_distance := h.child_distance

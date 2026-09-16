@@ -22,6 +22,8 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 private theorem barC_four_children_gaps :
     0 < barC * (barC + 2) - 4 ∧ 1 < 2 * barC * (barC - 1) := by
   have hc : (69 : ℝ) / 50 < barC := by
@@ -29,7 +31,7 @@ private theorem barC_four_children_gaps :
   constructor <;> nlinarith [sq_nonneg (barC - 69 / 50)]
 
 private theorem sibling_distance_mem_four_children_range
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (color : SixPointColor) :
     barC ≤ dist (configuration color .left) (configuration color .right) ∧
       dist (configuration color .left) (configuration color .right) ≤ 2 := by
@@ -46,7 +48,7 @@ private theorem sibling_distance_mem_four_children_range
         (h.child_distance color .right (by simp))
       _ = 2 := by norm_num
 
-private theorem cross_child_distance_le_three {configuration : SixPointConfiguration}
+private theorem cross_child_distance_le_three {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS) (redLabel blueLabel : SixPointLabel)
     (hred : redLabel ≠ .root) (hblue : blueLabel ≠ .root) :
     dist (configuration .red redLabel) (configuration .blue blueLabel) ≤ 3 := by
@@ -64,8 +66,8 @@ private theorem cross_child_distance_le_three {configuration : SixPointConfigura
       (add_le_add h.root_distance.le (h.child_distance .blue blueLabel hblue))
     _ = 3 := by norm_num
 
-private theorem exists_nonnegative_score_or_matching_obstruction_of_no_split
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+private theorem exists_nonnegative_score_or_matching_obstruction_of_no_split [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hno : ¬ ∃ x y : ℝ,
       dist (configuration .red .left) (configuration .red .right) - 1 ≤ x ∧ x ≤ 1 ∧
       dist (configuration .blue .left) (configuration .blue .right) - 1 ≤ y ∧ y ≤ 1 ∧
@@ -134,8 +136,8 @@ private theorem exists_nonnegative_score_or_matching_obstruction_of_no_split
 
 /-- Every admissible endpoint configuration has a nonnegative packing or an obstructing child
 matching. -/
-theorem exists_nonnegative_score_or_matching_obstruction
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS) :
+theorem exists_nonnegative_score_or_matching_obstruction [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS) :
     (∃ packing : SixPointPacking configuration, 0 ≤ packing.score barS) ∨
       (2 * barC - 1) *
           (dist (configuration .red .left) (configuration .red .right) +

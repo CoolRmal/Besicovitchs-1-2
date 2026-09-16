@@ -26,6 +26,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 private abbrev Five := Fin 5
 
 private abbrev Three := Fin 3
@@ -994,8 +996,8 @@ private theorem endpoint_balanced_lens_vector_bound {E : Type*} [NormedAddCommGr
 
 /-- The endpoint-balanced `E0/S0` lens separator is negative for every admissible
 six-point configuration. -/
-theorem endpointBalancedE0S0LensBound_of_admissible
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem endpointBalancedE0S0LensBound_of_admissible [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     EndpointBalancedE0S0LensBound configuration := by
   let e := configuration.rootDisplacement
   let p₁ := configuration.redDisplacement .left

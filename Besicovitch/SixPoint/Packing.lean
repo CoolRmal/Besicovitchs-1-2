@@ -22,8 +22,10 @@ open scoped BigOperators
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 /-- A supported radius assignment with disjoint same-color balls. -/
-structure SixPointPacking (configuration : SixPointConfiguration) where
+structure SixPointPacking (configuration : SixPointConfiguration E) where
   /-- The centers retained by the packing. -/
   support : Finset SixPointIndex
   meets_color : ∀ color, ∃ label, (color, label) ∈ support
@@ -34,7 +36,7 @@ structure SixPointPacking (configuration : SixPointConfiguration) where
 
 namespace SixPointPacking
 
-variable {configuration : SixPointConfiguration} (packing : SixPointPacking configuration)
+variable {configuration : SixPointConfiguration E} (packing : SixPointPacking configuration)
 
 /-- The support of a six-point packing is nonempty. -/
 theorem support_nonempty : packing.support.Nonempty := by

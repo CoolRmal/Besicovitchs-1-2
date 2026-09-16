@@ -21,6 +21,8 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- Swap the two child labels while fixing the root. -/
 def swapChildLabel : SixPointLabel → SixPointLabel
   | .root => .root
@@ -28,16 +30,16 @@ def swapChildLabel : SixPointLabel → SixPointLabel
   | .right => .left
 
 /-- Simultaneously swap the two children of both colors. -/
-def swapConfigurationChildren (configuration : SixPointConfiguration) : SixPointConfiguration :=
+def swapConfigurationChildren (configuration : SixPointConfiguration E) : SixPointConfiguration E :=
   fun color label ↦ configuration color (swapChildLabel label)
 
 /-- Interchange the red and blue colors. -/
-def transposeConfigurationColors (configuration : SixPointConfiguration) : SixPointConfiguration
+def transposeConfigurationColors (configuration : SixPointConfiguration E) : SixPointConfiguration E
   | .red => configuration .blue
   | .blue => configuration .red
 
 /-- Simultaneous child swap preserves endpoint admissibility. -/
-theorem IsAdmissibleAt.swapChildren {configuration : SixPointConfiguration} {s : ℝ}
+theorem IsAdmissibleAt.swapChildren {configuration : SixPointConfiguration E} {s : ℝ}
     (h : configuration.IsAdmissibleAt s) :
     (swapConfigurationChildren configuration).IsAdmissibleAt s where
   root_distance := h.root_distance
@@ -50,7 +52,7 @@ theorem IsAdmissibleAt.swapChildren {configuration : SixPointConfiguration} {s :
     simpa [swapConfigurationChildren, swapChildLabel, dist_comm] using h.sibling_distance color
 
 /-- Color transposition preserves endpoint admissibility. -/
-theorem IsAdmissibleAt.transposeColors {configuration : SixPointConfiguration} {s : ℝ}
+theorem IsAdmissibleAt.transposeColors {configuration : SixPointConfiguration E} {s : ℝ}
     (h : configuration.IsAdmissibleAt s) :
     (transposeConfigurationColors configuration).IsAdmissibleAt s where
   root_distance := by
@@ -63,30 +65,32 @@ theorem IsAdmissibleAt.transposeColors {configuration : SixPointConfiguration} {
       simpa [transposeConfigurationColors] using h.sibling_distance _
 
 /-- The distance between a chosen red child and a chosen blue child. -/
-def incidenceCrossDistance (configuration : SixPointConfiguration) (redChild blueChild : Fin 2) :
+def incidenceCrossDistance (configuration : SixPointConfiguration E) (redChild blueChild : Fin 2) :
     ℝ :=
   dist (configuration .red (incidenceChild redChild))
     (configuration .blue (incidenceChild blueChild))
 
 /-- The root-to-child radius at a chosen color and child. -/
-def incidenceChildRadius (configuration : SixPointConfiguration) (color : SixPointColor)
+def incidenceChildRadius (configuration : SixPointConfiguration E) (color : SixPointColor)
     (child : Fin 2) : ℝ :=
   dist (configuration color .root) (configuration color (incidenceChild child))
 
 /-- A child radius is the norm of its red displacement vector. -/
-theorem incidenceChildRadius_red_eq_norm (configuration : SixPointConfiguration) (child : Fin 2) :
+theorem incidenceChildRadius_red_eq_norm (configuration : SixPointConfiguration E)
+    (child : Fin 2) :
     incidenceChildRadius configuration .red child =
       ‖configuration.redDisplacement (incidenceChild child)‖ := by
   simp [incidenceChildRadius, SixPointConfiguration.redDisplacement, dist_eq_norm, norm_sub_rev]
 
 /-- A child radius is the norm of its pulled-back blue displacement vector. -/
-theorem incidenceChildRadius_blue_eq_norm (configuration : SixPointConfiguration) (child : Fin 2) :
+theorem incidenceChildRadius_blue_eq_norm (configuration : SixPointConfiguration E)
+    (child : Fin 2) :
     incidenceChildRadius configuration .blue child =
       ‖configuration.bluePullback (incidenceChild child)‖ := by
   simp [incidenceChildRadius, SixPointConfiguration.bluePullback, dist_eq_norm]
 
 /-- A cross distance is the norm of its endpoint-geometry displacement. -/
-theorem incidenceCrossDistance_eq_norm (configuration : SixPointConfiguration)
+theorem incidenceCrossDistance_eq_norm (configuration : SixPointConfiguration E)
     (redChild blueChild : Fin 2) :
     incidenceCrossDistance configuration redChild blueChild =
       ‖configuration.rootDisplacement -
@@ -102,19 +106,19 @@ def balancedIncidencePenalty (code : Fin 4) (firstRadius secondRadius : ℝ) : �
   | 3 => ((barC + 1) * firstRadius + (barC - 1) * secondRadius) / 2
 
 /-- The reduced matching slack retained from the four-child branch. -/
-def diagonalMatchingReducedSlack (configuration : SixPointConfiguration) : ℝ :=
+def diagonalMatchingReducedSlack (configuration : SixPointConfiguration E) : ℝ :=
   incidenceCrossDistance configuration 0 0 + incidenceCrossDistance configuration 1 1 -
     2 * barC * (2 * barC - 1)
 
 /-- The selected diagonal matching alternative from the four-child minimax. -/
-def SelectedDiagonalMatchingFails (configuration : SixPointConfiguration) : Prop :=
+def SelectedDiagonalMatchingFails (configuration : SixPointConfiguration E) : Prop :=
   (2 * barC - 1) *
       (dist (configuration .red .left) (configuration .red .right) +
         dist (configuration .blue .left) (configuration .blue .right)) ≤
     incidenceCrossDistance configuration 0 0 + incidenceCrossDistance configuration 1 1
 
 /-- The selected diagonal matching is unchanged by simultaneous child swap. -/
-theorem selectedDiagonalMatchingFails_swapChildren (configuration : SixPointConfiguration) :
+theorem selectedDiagonalMatchingFails_swapChildren (configuration : SixPointConfiguration E) :
     SelectedDiagonalMatchingFails (swapConfigurationChildren configuration) ↔
       SelectedDiagonalMatchingFails configuration := by
   simp only [SelectedDiagonalMatchingFails, incidenceCrossDistance, incidenceChild,
@@ -123,7 +127,7 @@ theorem selectedDiagonalMatchingFails_swapChildren (configuration : SixPointConf
     simpa [add_comm, dist_comm] using h
 
 /-- The selected diagonal matching is unchanged by color transposition. -/
-theorem selectedDiagonalMatchingFails_transposeColors (configuration : SixPointConfiguration) :
+theorem selectedDiagonalMatchingFails_transposeColors (configuration : SixPointConfiguration E) :
     SelectedDiagonalMatchingFails (transposeConfigurationColors configuration) ↔
       SelectedDiagonalMatchingFails configuration := by
   simp only [SelectedDiagonalMatchingFails, incidenceCrossDistance, incidenceChild,
@@ -132,7 +136,8 @@ theorem selectedDiagonalMatchingFails_transposeColors (configuration : SixPointC
     simpa [add_comm, dist_comm] using h
 
 /-- Red endpoint failures respect simultaneous child swap. -/
-theorem redEndpointFailure_swapChildren (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem redEndpointFailure_swapChildren (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     redSiblingTriangleFailure (swapConfigurationChildren configuration)
         (.endpoint (swapEndpointCode code)) ↔
       redSiblingTriangleFailure configuration (.endpoint code) := by
@@ -143,7 +148,8 @@ theorem redEndpointFailure_swapChildren (configuration : SixPointConfiguration) 
       incidenceFirst, incidenceSecond, incidenceChild, dist_comm, add_comm]
 
 /-- Blue endpoint failures respect simultaneous child swap. -/
-theorem blueEndpointFailure_swapChildren (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem blueEndpointFailure_swapChildren (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     blueSiblingTriangleFailure (swapConfigurationChildren configuration)
         (.endpoint (swapEndpointCode code)) ↔
       blueSiblingTriangleFailure configuration (.endpoint code) := by
@@ -155,7 +161,8 @@ theorem blueEndpointFailure_swapChildren (configuration : SixPointConfiguration)
       incidenceChild, dist_comm, add_comm]
 
 /-- Red balanced failures respect simultaneous child swap. -/
-theorem redBalancedFailure_swapChildren (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem redBalancedFailure_swapChildren (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     redSiblingTriangleFailure (swapConfigurationChildren configuration)
         (.balanced (swapBalancedCode code)) ↔
       redSiblingTriangleFailure configuration (.balanced code) := by
@@ -167,7 +174,8 @@ theorem redBalancedFailure_swapChildren (configuration : SixPointConfiguration) 
     constructor <;> intro h <;> nlinarith
 
 /-- Blue balanced failures respect simultaneous child swap. -/
-theorem blueBalancedFailure_swapChildren (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem blueBalancedFailure_swapChildren (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     blueSiblingTriangleFailure (swapConfigurationChildren configuration)
         (.balanced (swapBalancedCode code)) ↔
       blueSiblingTriangleFailure configuration (.balanced code) := by
@@ -180,7 +188,8 @@ theorem blueBalancedFailure_swapChildren (configuration : SixPointConfiguration)
     constructor <;> intro h <;> nlinarith
 
 /-- Red endpoint failures become blue endpoint failures under color transposition. -/
-theorem redEndpointFailure_transposeColors (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem redEndpointFailure_transposeColors (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     redSiblingTriangleFailure (transposeConfigurationColors configuration)
         (.endpoint (transposeEndpointCode code)) ↔
       blueSiblingTriangleFailure configuration (.endpoint code) := by
@@ -193,7 +202,8 @@ theorem redEndpointFailure_transposeColors (configuration : SixPointConfiguratio
       dist_comm, add_comm]
 
 /-- Blue endpoint failures become red endpoint failures under color transposition. -/
-theorem blueEndpointFailure_transposeColors (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem blueEndpointFailure_transposeColors (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     blueSiblingTriangleFailure (transposeConfigurationColors configuration)
         (.endpoint (transposeEndpointCode code)) ↔
       redSiblingTriangleFailure configuration (.endpoint code) := by
@@ -206,7 +216,8 @@ theorem blueEndpointFailure_transposeColors (configuration : SixPointConfigurati
       dist_comm, add_comm]
 
 /-- Red balanced failures become blue balanced failures under color transposition. -/
-theorem redBalancedFailure_transposeColors (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem redBalancedFailure_transposeColors (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     redSiblingTriangleFailure (transposeConfigurationColors configuration) (.balanced code) ↔
       blueSiblingTriangleFailure configuration (.balanced code) := by
   fin_cases code <;>
@@ -218,7 +229,8 @@ theorem redBalancedFailure_transposeColors (configuration : SixPointConfiguratio
       dist_comm, add_comm]
 
 /-- Blue balanced failures become red balanced failures under color transposition. -/
-theorem blueBalancedFailure_transposeColors (configuration : SixPointConfiguration) (code : Fin 4) :
+theorem blueBalancedFailure_transposeColors (configuration : SixPointConfiguration E)
+    (code : Fin 4) :
     blueSiblingTriangleFailure (transposeConfigurationColors configuration) (.balanced code) ↔
       redSiblingTriangleFailure configuration (.balanced code) := by
   fin_cases code <;>
@@ -230,7 +242,7 @@ theorem blueBalancedFailure_transposeColors (configuration : SixPointConfigurati
       dist_comm, add_comm]
 
 /-- The reduced upper slack for a red endpoint incidence. -/
-def redEndpointReducedSlack (configuration : SixPointConfiguration) (code : Fin 4) : ℝ :=
+def redEndpointReducedSlack (configuration : SixPointConfiguration E) (code : Fin 4) : ℝ :=
   let blueChild := incidenceSecond code
   incidenceCrossDistance configuration (incidenceFirst code) blueChild -
     (1 + 3 * barC * (barC - 1) / 2) -
@@ -238,7 +250,7 @@ def redEndpointReducedSlack (configuration : SixPointConfiguration) (code : Fin 
       (barC + 1) * incidenceChildRadius configuration .blue (otherChild blueChild)) / 2
 
 /-- The reduced upper slack for a blue endpoint incidence. -/
-def blueEndpointReducedSlack (configuration : SixPointConfiguration) (code : Fin 4) : ℝ :=
+def blueEndpointReducedSlack (configuration : SixPointConfiguration E) (code : Fin 4) : ℝ :=
   let redChild := incidenceFirst code
   incidenceCrossDistance configuration redChild (incidenceSecond code) -
     (1 + 3 * barC * (barC - 1) / 2) -
@@ -246,7 +258,7 @@ def blueEndpointReducedSlack (configuration : SixPointConfiguration) (code : Fin
       (barC + 1) * incidenceChildRadius configuration .red (otherChild redChild)) / 2
 
 /-- The reduced upper slack for a red balanced incidence. -/
-def redBalancedReducedSlack (configuration : SixPointConfiguration) (code : Fin 4) : ℝ :=
+def redBalancedReducedSlack (configuration : SixPointConfiguration E) (code : Fin 4) : ℝ :=
   (incidenceCrossDistance configuration 0 (incidenceFirst code) +
       incidenceCrossDistance configuration 1 (incidenceSecond code)) / 2 +
     barC - 3 * barC ^ 2 / 2 -
@@ -254,7 +266,7 @@ def redBalancedReducedSlack (configuration : SixPointConfiguration) (code : Fin 
       (incidenceChildRadius configuration .blue 1)
 
 /-- The reduced upper slack for a blue balanced incidence. -/
-def blueBalancedReducedSlack (configuration : SixPointConfiguration) (code : Fin 4) : ℝ :=
+def blueBalancedReducedSlack (configuration : SixPointConfiguration E) (code : Fin 4) : ℝ :=
   (incidenceCrossDistance configuration (incidenceFirst code) 0 +
       incidenceCrossDistance configuration (incidenceSecond code) 1) / 2 +
     barC - 3 * barC ^ 2 / 2 -
@@ -262,7 +274,7 @@ def blueBalancedReducedSlack (configuration : SixPointConfiguration) (code : Fin
       (incidenceChildRadius configuration .red 1)
 
 /-- The selected matching alternative makes its reduced slack nonnegative. -/
-theorem diagonalMatchingReducedSlack_nonneg {configuration : SixPointConfiguration}
+theorem diagonalMatchingReducedSlack_nonneg {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     0 ≤ diagonalMatchingReducedSlack configuration := by
@@ -278,7 +290,7 @@ theorem diagonalMatchingReducedSlack_nonneg {configuration : SixPointConfigurati
   simpa [mul_comm] using hscaled.trans hmatching
 
 /-- A red endpoint failure makes the corresponding reduced endpoint slack positive. -/
-theorem redEndpointReducedSlack_pos {configuration : SixPointConfiguration}
+theorem redEndpointReducedSlack_pos {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS) (code : Fin 4)
     (hfailure : redSiblingTriangleFailure configuration (.endpoint code)) :
     0 < redEndpointReducedSlack configuration code := by
@@ -296,7 +308,7 @@ theorem redEndpointReducedSlack_pos {configuration : SixPointConfiguration}
     nlinarith
 
 /-- A blue endpoint failure makes the corresponding reduced endpoint slack positive. -/
-theorem blueEndpointReducedSlack_pos {configuration : SixPointConfiguration}
+theorem blueEndpointReducedSlack_pos {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS) (code : Fin 4)
     (hfailure : blueSiblingTriangleFailure configuration (.endpoint code)) :
     0 < blueEndpointReducedSlack configuration code := by
@@ -316,7 +328,7 @@ theorem blueEndpointReducedSlack_pos {configuration : SixPointConfiguration}
     nlinarith
 
 /-- A red balanced failure makes the corresponding reduced balanced slack positive. -/
-theorem redBalancedReducedSlack_pos {configuration : SixPointConfiguration}
+theorem redBalancedReducedSlack_pos {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS) (code : Fin 4)
     (hfailure : redSiblingTriangleFailure configuration (.balanced code)) :
     0 < redBalancedReducedSlack configuration code := by
@@ -337,7 +349,7 @@ theorem redBalancedReducedSlack_pos {configuration : SixPointConfiguration}
     nlinarith
 
 /-- A blue balanced failure makes the corresponding reduced balanced slack positive. -/
-theorem blueBalancedReducedSlack_pos {configuration : SixPointConfiguration}
+theorem blueBalancedReducedSlack_pos {configuration : SixPointConfiguration E}
     (h : configuration.IsAdmissibleAt barS) (code : Fin 4)
     (hfailure : blueSiblingTriangleFailure configuration (.balanced code)) :
     0 < blueBalancedReducedSlack configuration code := by
@@ -362,8 +374,8 @@ theorem blueBalancedReducedSlack_pos {configuration : SixPointConfiguration}
     nlinarith
 
 /-- The `E0/S1` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_zero_and_blueBalanced_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_zero_and_blueBalanced_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
       blueSiblingTriangleFailure configuration (.balanced 1)) := by
@@ -393,8 +405,8 @@ theorem not_redEndpoint_zero_and_blueBalanced_one
   nlinarith
 
 /-- The `E0/S2` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_zero_and_blueBalanced_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_zero_and_blueBalanced_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
       blueSiblingTriangleFailure configuration (.balanced 2)) := by
@@ -424,8 +436,8 @@ theorem not_redEndpoint_zero_and_blueBalanced_two
   nlinarith
 
 /-- The `E0/S3` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_zero_and_blueBalanced_three
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_zero_and_blueBalanced_three [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
       blueSiblingTriangleFailure configuration (.balanced 3)) := by
@@ -455,8 +467,8 @@ theorem not_redEndpoint_zero_and_blueBalanced_three
   nlinarith
 
 /-- The `E1/S1` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_one_and_blueBalanced_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_one_and_blueBalanced_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 1)) := by
@@ -486,8 +498,8 @@ theorem not_redEndpoint_one_and_blueBalanced_one
   nlinarith
 
 /-- The `E1/S2` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_one_and_blueBalanced_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem not_redEndpoint_one_and_blueBalanced_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 2)) := by
   rintro ⟨hred, hblue⟩
@@ -514,8 +526,8 @@ theorem not_redEndpoint_one_and_blueBalanced_two
   nlinarith
 
 /-- The `E1/S3` red-endpoint/blue-balanced representative is impossible. -/
-theorem not_redEndpoint_one_and_blueBalanced_three
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_one_and_blueBalanced_three [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 3)) := by
@@ -545,8 +557,8 @@ theorem not_redEndpoint_one_and_blueBalanced_three
   nlinarith
 
 /-- The `S0/S1` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_zero_and_blueBalanced_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem not_redBalanced_zero_and_blueBalanced_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 0) ∧
       blueSiblingTriangleFailure configuration (.balanced 1)) := by
   rintro ⟨hred, hblue⟩
@@ -573,8 +585,8 @@ theorem not_redBalanced_zero_and_blueBalanced_one
   nlinarith
 
 /-- The `S0/S2` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_zero_and_blueBalanced_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem not_redBalanced_zero_and_blueBalanced_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 0) ∧
       blueSiblingTriangleFailure configuration (.balanced 2)) := by
   rintro ⟨hred, hblue⟩
@@ -601,8 +613,8 @@ theorem not_redBalanced_zero_and_blueBalanced_two
   nlinarith
 
 /-- The `S1/S1` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_one_and_blueBalanced_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redBalanced_one_and_blueBalanced_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 1)) := by
@@ -632,8 +644,8 @@ theorem not_redBalanced_one_and_blueBalanced_one
   nlinarith
 
 /-- The `S1/S2` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_one_and_blueBalanced_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem not_redBalanced_one_and_blueBalanced_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 2)) := by
   rintro ⟨hred, hblue⟩
@@ -660,8 +672,8 @@ theorem not_redBalanced_one_and_blueBalanced_two
   nlinarith
 
 /-- The `S2/S2` balanced/balanced representative is impossible. -/
-theorem not_redBalanced_two_and_blueBalanced_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redBalanced_two_and_blueBalanced_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 2) ∧
       blueSiblingTriangleFailure configuration (.balanced 2)) := by
@@ -691,8 +703,8 @@ theorem not_redBalanced_two_and_blueBalanced_two
   nlinarith
 
 /-- The first adjacent endpoint representative is impossible. -/
-theorem not_redEndpoint_zero_and_blueEndpoint_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_zero_and_blueEndpoint_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
       blueSiblingTriangleFailure configuration (.endpoint 1)) := by
@@ -722,8 +734,8 @@ theorem not_redEndpoint_zero_and_blueEndpoint_one
   nlinarith
 
 /-- The second adjacent endpoint representative is impossible. -/
-theorem not_redEndpoint_zero_and_blueEndpoint_two
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_zero_and_blueEndpoint_two [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
       blueSiblingTriangleFailure configuration (.endpoint 2)) := by
@@ -753,38 +765,38 @@ theorem not_redEndpoint_zero_and_blueEndpoint_two
   nlinarith
 
 /-- The exact scalar lens bound for the off-matching coincident endpoint cell. -/
-def OffMatchingCoincidentLensBound (configuration : SixPointConfiguration) : Prop :=
+def OffMatchingCoincidentLensBound (configuration : SixPointConfiguration E) : Prop :=
   6 * diagonalMatchingReducedSlack configuration +
       7 * redEndpointReducedSlack configuration 1 +
       7 * blueEndpointReducedSlack configuration 1 < 0
 
 /-- The exact scalar lens bound for the `E0/S0` endpoint/balanced cell. -/
-def EndpointBalancedE0S0LensBound (configuration : SixPointConfiguration) : Prop :=
+def EndpointBalancedE0S0LensBound (configuration : SixPointConfiguration E) : Prop :=
   5 * diagonalMatchingReducedSlack configuration +
       9 * redEndpointReducedSlack configuration 0 +
       6 * blueBalancedReducedSlack configuration 0 < 0
 
 /-- The exact scalar lens bound for the `E1/S0` endpoint/balanced cell. -/
-def EndpointBalancedE1S0LensBound (configuration : SixPointConfiguration) : Prop :=
+def EndpointBalancedE1S0LensBound (configuration : SixPointConfiguration E) : Prop :=
   13 * diagonalMatchingReducedSlack configuration +
       24 * redEndpointReducedSlack configuration 1 +
       15 * blueBalancedReducedSlack configuration 0 < 0
 
 /-- The exact scalar lens bound for the `S0/S0` balanced/balanced cell. -/
-def BalancedBalancedS0S0LensBound (configuration : SixPointConfiguration) : Prop :=
+def BalancedBalancedS0S0LensBound (configuration : SixPointConfiguration E) : Prop :=
   2 * diagonalMatchingReducedSlack configuration +
       5 * redBalancedReducedSlack configuration 0 +
       5 * blueBalancedReducedSlack configuration 0 < 0
 
 /-- The exact scalar lens bound for the `S0/S3` balanced/balanced cell. -/
-def BalancedBalancedS0S3LensBound (configuration : SixPointConfiguration) : Prop :=
+def BalancedBalancedS0S3LensBound (configuration : SixPointConfiguration E) : Prop :=
   7 * diagonalMatchingReducedSlack configuration +
       20 * redBalancedReducedSlack configuration 0 +
       20 * blueBalancedReducedSlack configuration 3 < 0
 
 /-- The off-matching scalar lens bound excludes its endpoint representative. -/
 theorem offMatchingCoincident_excluded_of_lensBound
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hlens : OffMatchingCoincidentLensBound configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
@@ -800,7 +812,7 @@ theorem offMatchingCoincident_excluded_of_lensBound
 
 /-- The `E0/S0` scalar lens bound excludes its endpoint/balanced representative. -/
 theorem endpointBalancedE0S0_excluded_of_lensBound
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hlens : EndpointBalancedE0S0LensBound configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 0) ∧
@@ -816,7 +828,7 @@ theorem endpointBalancedE0S0_excluded_of_lensBound
 
 /-- The `E1/S0` scalar lens bound excludes its endpoint/balanced representative. -/
 theorem endpointBalancedE1S0_excluded_of_lensBound
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hlens : EndpointBalancedE1S0LensBound configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
@@ -832,7 +844,7 @@ theorem endpointBalancedE1S0_excluded_of_lensBound
 
 /-- The `S0/S0` scalar lens bound excludes its balanced representative. -/
 theorem balancedBalancedS0S0_excluded_of_lensBound
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hlens : BalancedBalancedS0S0LensBound configuration) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 0) ∧
@@ -848,7 +860,7 @@ theorem balancedBalancedS0S0_excluded_of_lensBound
 
 /-- The `S0/S3` scalar lens bound excludes its balanced representative. -/
 theorem balancedBalancedS0S3_excluded_of_lensBound
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hlens : BalancedBalancedS0S3LensBound configuration) :
     ¬ (redSiblingTriangleFailure configuration (.balanced 0) ∧
@@ -863,8 +875,8 @@ theorem balancedBalancedS0S3_excluded_of_lensBound
       20 * blueBalancedReducedSlack configuration 3)) hlens
 
 /-- Every endpoint/endpoint cell outside the matched and off-matching lens orbits is excluded. -/
-theorem endpointEndpoint_excluded_outside_lens
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem endpointEndpoint_excluded_outside_lens [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) (redCode blueCode : Fin 4)
     (hnotMatched : endpointEndpointOrbit redCode blueCode ≠ .matchedCoincident)
     (hnotLens : endpointEndpointOrbit redCode blueCode ≠ .offMatchingCoincident) :
@@ -929,8 +941,8 @@ theorem endpointEndpoint_excluded_outside_lens
   · exact (hnotMatched rfl).elim
 
 /-- Every endpoint/balanced cell outside the two lens orbits is excluded. -/
-theorem endpointBalanced_excluded_outside_lenses
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem endpointBalanced_excluded_outside_lenses [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) (endpointCode balancedCode : Fin 4)
     (hnotE0S0 : endpointBalancedOrbit endpointCode balancedCode ≠ .e0s0)
     (hnotE1S0 : endpointBalancedOrbit endpointCode balancedCode ≠ .e1s0) :
@@ -978,8 +990,8 @@ theorem endpointBalanced_excluded_outside_lenses
   · exact (hnotE0S0 rfl).elim
 
 /-- The color-reversed endpoint/balanced cells outside the two lens orbits are excluded. -/
-theorem balancedEndpoint_excluded_outside_lenses
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem balancedEndpoint_excluded_outside_lenses [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) (balancedCode endpointCode : Fin 4)
     (hnotE0S0 : endpointBalancedOrbit (transposeEndpointCode endpointCode) balancedCode ≠ .e0s0)
     (hnotE1S0 : endpointBalancedOrbit (transposeEndpointCode endpointCode) balancedCode ≠ .e1s0) :
@@ -993,8 +1005,8 @@ theorem balancedEndpoint_excluded_outside_lenses
     (blueBalancedFailure_transposeColors configuration balancedCode).2 failures.1⟩
 
 /-- Every balanced/balanced cell outside the two lens orbits is excluded. -/
-theorem balancedBalanced_excluded_outside_lenses
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem balancedBalanced_excluded_outside_lenses [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) (redCode blueCode : Fin 4)
     (hnotS0S0 : balancedBalancedOrbit redCode blueCode ≠ .s0s0)
     (hnotS0S3 : balancedBalancedOrbit redCode blueCode ≠ .s0s3) :
@@ -1048,7 +1060,7 @@ theorem balancedBalanced_excluded_outside_lenses
   · exact (hnotS0S0 rfl).elim
 
 /-- The five possible outcomes after all tangent and direct incidence exclusions. -/
-def SiblingIncidenceOutcome (configuration : SixPointConfiguration) : Prop :=
+def SiblingIncidenceOutcome (configuration : SixPointConfiguration E) : Prop :=
   (∃ code : Fin 4, (code = 0 ∨ code = 3) ∧
       redSiblingTriangleFailure configuration (.endpoint code) ∧
       blueSiblingTriangleFailure configuration (.endpoint code)) ∨
@@ -1072,8 +1084,8 @@ def SiblingIncidenceOutcome (configuration : SixPointConfiguration) : Prop :=
       blueSiblingTriangleFailure configuration (.balanced blueCode))
 
 /-- Simultaneous sibling-triangle witnesses route to a matched endpoint or one lens orbit. -/
-theorem siblingIncidence_route
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem siblingIncidence_route [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hred : ∃ witness, redSiblingTriangleFailure configuration witness)
     (hblue : ∃ witness, blueSiblingTriangleFailure configuration witness) :
@@ -1126,8 +1138,8 @@ theorem siblingIncidence_route
                 hzero hthree ⟨hred, hblue⟩).elim
 
 /-- If supports `67` and `76` both fail, their witnesses route to the five residual outcomes. -/
-theorem siblingTriangle_score_failure_route
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem siblingTriangle_score_failure_route [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hred : RedSiblingTriangleFails configuration h)
     (hblue : BlueSiblingTriangleFails configuration h) :

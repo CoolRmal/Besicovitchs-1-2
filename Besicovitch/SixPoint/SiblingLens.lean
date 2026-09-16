@@ -24,6 +24,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 private theorem norm_tangent {E : Type*} [SeminormedAddCommGroup E]
     (x : E) {radius : ℝ} (hradius : 0 < radius) :
     ‖x‖ ≤ (‖x‖ ^ 2 + radius ^ 2) / (2 * radius) := by
@@ -193,8 +195,8 @@ theorem offMatchingCoincidentTangentCertificate {E : Type*} [NormedAddCommGroup 
   nlinarith
 
 /-- The off-matching coincident lens bound holds for every admissible configuration. -/
-theorem offMatchingCoincidentLensBound_of_admissible
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem offMatchingCoincidentLensBound_of_admissible [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     OffMatchingCoincidentLensBound configuration := by
   let e := configuration.rootDisplacement
   let p₁ := configuration.redDisplacement .left
@@ -224,8 +226,8 @@ theorem offMatchingCoincidentLensBound_of_admissible
   nlinarith
 
 /-- The off-matching coincident endpoint representative is impossible. -/
-theorem not_redEndpoint_one_and_blueEndpoint_one
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_one_and_blueEndpoint_one [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
       blueSiblingTriangleFailure configuration (.endpoint 1)) :=

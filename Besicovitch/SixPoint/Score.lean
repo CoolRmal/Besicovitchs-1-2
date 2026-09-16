@@ -19,9 +19,11 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 namespace SixPointPacking
 
-variable {configuration configuration' : SixPointConfiguration}
+variable {configuration configuration' : SixPointConfiguration E}
 
 /-- Increasing the score parameter adds an explicit virtual-diameter gain. -/
 theorem score_eq_add_gain (packing : SixPointPacking configuration) {s β : ℝ} (hs : 0 < s)

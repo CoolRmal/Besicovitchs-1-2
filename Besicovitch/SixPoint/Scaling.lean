@@ -22,9 +22,11 @@ open scoped BigOperators
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 namespace SixPointPacking
 
-variable {configuration : SixPointConfiguration}
+variable {configuration : SixPointConfiguration E}
 
 /-- Shrink every packing radius by a factor in `[0, 1]`. -/
 def scaleRadii (packing : SixPointPacking configuration) (q : ℝ) (hq0 : 0 ≤ q)

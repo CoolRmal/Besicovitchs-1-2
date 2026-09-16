@@ -21,6 +21,8 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- The involution on six-point indices that swaps both pairs of children. -/
 def swapChildrenIndexEquiv : SixPointIndex ≃ SixPointIndex where
   toFun index := (index.1, swapChildLabel index.2)
@@ -40,22 +42,25 @@ def swapChildrenIndexEquiv : SixPointIndex ≃ SixPointIndex where
   rcases index with ⟨color, label⟩
   cases label <;> rfl
 
+omit [NormedAddCommGroup E] in
 private theorem swapConfigurationChildren_swapIndex
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapConfigurationChildren configuration (swapChildrenIndexEquiv index).1
         (swapChildrenIndexEquiv index).2 = configuration index.1 index.2 := by
   rcases index with ⟨color, label⟩
   cases label <;> rfl
 
+omit [NormedAddCommGroup E] in
 @[simp] private theorem swapConfigurationChildren_swappedLabel
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapConfigurationChildren configuration index.1 (swapChildrenIndexEquiv index).2 =
       configuration index.1 index.2 := by
   rcases index with ⟨color, label⟩
   cases label <;> rfl
 
+omit [NormedAddCommGroup E] in
 @[simp] private theorem swapConfigurationChildren_eq_swapIndex
-    (configuration : SixPointConfiguration) (index : SixPointIndex) :
+    (configuration : SixPointConfiguration E) (index : SixPointIndex) :
     swapConfigurationChildren configuration index.1 index.2 =
       configuration (swapChildrenIndexEquiv index).1 (swapChildrenIndexEquiv index).2 := by
   rcases index with ⟨color, label⟩
@@ -72,7 +77,7 @@ theorem swapChildrenIndex_mem_of_mem_map {support : Finset SixPointIndex}
   simpa using hsource
 
 /-- Relabel a packing after both pairs of children have been swapped. -/
-def unswapChildren {configuration : SixPointConfiguration}
+def unswapChildren {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration)) :
     SixPointPacking configuration where
   support := packing.support.map swapChildrenIndexEquiv.toEmbedding
@@ -97,7 +102,7 @@ def unswapChildren {configuration : SixPointConfiguration}
     have hp := packing.same_color_disjoint i' j' hij' hcolor'
     simpa [i', j', swapConfigurationChildren_swappedLabel] using hp
 
-private def unswapChildrenSupportEquiv {configuration : SixPointConfiguration}
+private def unswapChildrenSupportEquiv {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration)) :
     packing.unswapChildren.support ≃ packing.support where
   toFun index := ⟨swapChildrenIndexEquiv index, swapChildrenIndex_mem_of_mem_map index.2⟩
@@ -110,21 +115,21 @@ private def unswapChildrenSupportEquiv {configuration : SixPointConfiguration}
     exact swapChildrenIndexEquiv_involution index
 
 @[simp] private theorem unswapChildrenSupportEquiv_apply_val
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration))
     (index : packing.unswapChildren.support) :
     ((unswapChildrenSupportEquiv packing index : packing.support) : SixPointIndex) =
       swapChildrenIndexEquiv index := rfl
 
 @[simp] private theorem unswapChildrenSupportEquiv_symm_apply_val
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration))
     (index : packing.support) :
     (((unswapChildrenSupportEquiv packing).symm index : packing.unswapChildren.support) :
       SixPointIndex) = swapChildrenIndexEquiv index := rfl
 
 @[simp] private theorem unswapChildren_radius_eq
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration))
     (index : packing.unswapChildren.support) :
     (packing.unswapChildren.radius index : ℝ) =
@@ -132,7 +137,7 @@ private def unswapChildrenSupportEquiv {configuration : SixPointConfiguration}
   congr 1
 
 private theorem unswapChildren_radius_symm_eq
-    {configuration : SixPointConfiguration}
+    {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration))
     (index : packing.support) :
     (packing.unswapChildren.radius ((unswapChildrenSupportEquiv packing).symm index) : ℝ) =
@@ -142,7 +147,7 @@ private theorem unswapChildren_radius_symm_eq
     ((unswapChildrenSupportEquiv packing).apply_symm_apply index)
 
 /-- Simultaneously swapping child names leaves the total radius unchanged. -/
-theorem unswapChildren_totalRadius {configuration : SixPointConfiguration}
+theorem unswapChildren_totalRadius {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration)) :
     packing.unswapChildren.totalRadius = packing.totalRadius := by
   unfold totalRadius
@@ -152,7 +157,7 @@ theorem unswapChildren_totalRadius {configuration : SixPointConfiguration}
   congr 1
 
 /-- Simultaneously swapping child names leaves the virtual diameter unchanged. -/
-theorem unswapChildren_virtualDiameter {configuration : SixPointConfiguration}
+theorem unswapChildren_virtualDiameter {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration)) :
     packing.unswapChildren.virtualDiameter = packing.virtualDiameter := by
   apply le_antisymm
@@ -178,7 +183,7 @@ theorem unswapChildren_virtualDiameter {configuration : SixPointConfiguration}
         ((unswapChildrenSupportEquiv packing).symm j)
 
 /-- Simultaneously swapping child names leaves the packing score unchanged. -/
-theorem unswapChildren_score {configuration : SixPointConfiguration}
+theorem unswapChildren_score {configuration : SixPointConfiguration E}
     (packing : SixPointPacking (swapConfigurationChildren configuration)) (s : ℝ) :
     packing.unswapChildren.score s = packing.score s := by
   simp only [score, packing.unswapChildren_totalRadius, packing.unswapChildren_virtualDiameter]

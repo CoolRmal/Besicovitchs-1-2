@@ -20,8 +20,10 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 /-- The packing on all four children with prescribed tangent radius splits. -/
-def fourChildrenPacking (configuration : SixPointConfiguration) {L M x y : ℝ}
+def fourChildrenPacking (configuration : SixPointConfiguration E) {L M x y : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
@@ -85,7 +87,7 @@ def fourChildrenSplitDiameter (L M x y B11 B12 B21 B22 : ℝ) : ℝ :=
 
 /-- The total radius of the four-child packing is the sum of the two sibling lengths. -/
 theorem fourChildrenPacking_totalRadius
-    (configuration : SixPointConfiguration) {L M x y : ℝ}
+    (configuration : SixPointConfiguration E) {L M x y : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
@@ -113,7 +115,7 @@ theorem fourChildrenPacking_totalRadius
       ring
 
 private theorem fourChildren_sameColorPair_le
-    {configuration : SixPointConfiguration} (packing : SixPointPacking configuration)
+    {configuration : SixPointConfiguration E} (packing : SixPointPacking configuration)
     (i j : packing.support) (hcolor : i.1.1 = j.1.1) {bound : ℝ}
     (hbound : 1 ≤ bound)
     (hdist : dist (configuration i.1.1 i.1.2) (configuration j.1.1 j.1.2) ≤ bound) :
@@ -127,7 +129,7 @@ private theorem fourChildren_sameColorPair_le
 
 /-- The virtual diameter of the four-child packing is its explicit split minimax. -/
 theorem fourChildrenPacking_virtualDiameter
-    (configuration : SixPointConfiguration) {L M x y : ℝ}
+    (configuration : SixPointConfiguration E) {L M x y : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
@@ -291,7 +293,7 @@ theorem fourChildrenPacking_virtualDiameter
 
 /-- A split below `c(L+M)` gives the four-child packing nonnegative score at `c/2`. -/
 theorem fourChildrenPacking_score_nonnegative
-    (configuration : SixPointConfiguration) {c L M x y : ℝ}
+    (configuration : SixPointConfiguration E) {c L M x y : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)

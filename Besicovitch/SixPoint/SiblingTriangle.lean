@@ -20,6 +20,8 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [PseudoMetricSpace E]
+
 /-- The canonical triangle's total radius is its semiperimeter. -/
 theorem canonicalTriangleRadius_sum {X : Type*} [PseudoMetricSpace X]
     (root left right : X) :
@@ -31,7 +33,7 @@ theorem canonicalTriangleRadius_sum {X : Type*} [PseudoMetricSpace X]
   ring
 
 /-- Support `67`: the red sibling pair against the canonical blue triangle. -/
-def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration) {L x : ℝ}
+def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration E) {L x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
@@ -90,7 +92,7 @@ def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration) {L x :
 
 /-- The left red radius in support `67` is the split variable. -/
 @[simp] theorem redSiblingBlueTrianglePacking_radius_left
-    (configuration : SixPointConfiguration) {L x : ℝ}
+    (configuration : SixPointConfiguration E) {L x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
@@ -103,7 +105,7 @@ def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration) {L x :
 
 /-- The right red radius in support `67` is the complementary split. -/
 @[simp] theorem redSiblingBlueTrianglePacking_radius_right
-    (configuration : SixPointConfiguration) {L x : ℝ}
+    (configuration : SixPointConfiguration E) {L x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
@@ -116,7 +118,7 @@ def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration) {L x :
 
 /-- Blue radii in support `67` are the canonical triangle radii. -/
 @[simp] theorem redSiblingBlueTrianglePacking_radius_blue
-    (configuration : SixPointConfiguration) {L x : ℝ}
+    (configuration : SixPointConfiguration E) {L x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
@@ -132,7 +134,7 @@ def redSiblingBlueTrianglePacking (configuration : SixPointConfiguration) {L x :
 
 /-- The total radius of support `67` is the sibling length plus blue semiperimeter. -/
 theorem redSiblingBlueTrianglePacking_totalRadius
-    (configuration : SixPointConfiguration) {L x : ℝ}
+    (configuration : SixPointConfiguration E) {L x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hL : 1 ≤ L) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
     (hblueLeft : dist (configuration .blue .root) (configuration .blue .left) ≤ 1)
@@ -163,7 +165,7 @@ theorem redSiblingBlueTrianglePacking_totalRadius
       ring
 
 /-- Support `76`: the blue sibling pair against the canonical red triangle. -/
-def blueSiblingRedTrianglePacking (configuration : SixPointConfiguration) {M y : ℝ}
+def blueSiblingRedTrianglePacking (configuration : SixPointConfiguration E) {M y : ℝ}
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hM : 1 ≤ M) (hy_lower : M - 1 ≤ y) (hy_upper : y ≤ 1)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
@@ -222,7 +224,7 @@ def blueSiblingRedTrianglePacking (configuration : SixPointConfiguration) {M y :
 
 /-- The total radius of support `76` is the sibling length plus red semiperimeter. -/
 theorem blueSiblingRedTrianglePacking_totalRadius
-    (configuration : SixPointConfiguration) {M y : ℝ}
+    (configuration : SixPointConfiguration E) {M y : ℝ}
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hM : 1 ≤ M) (hy_lower : M - 1 ≤ y) (hy_upper : y ≤ 1)
     (hredLeft : dist (configuration .red .root) (configuration .red .left) ≤ 1)
@@ -253,14 +255,14 @@ theorem blueSiblingRedTrianglePacking_totalRadius
       ring
 
 /-- Cross reach from a red point to a blue point carrying its canonical radius. -/
-def redSiblingBlueTriangleReach (configuration : SixPointConfiguration)
+def redSiblingBlueTriangleReach (configuration : SixPointConfiguration E)
     (redLabel blueLabel : SixPointLabel) : ℝ :=
   dist (configuration .red redLabel) (configuration .blue blueLabel) +
     canonicalTriangleRadius (configuration .blue .root) (configuration .blue .left)
       (configuration .blue .right) blueLabel
 
 /-- Cross reach from a blue point to a red point carrying its canonical radius. -/
-def blueSiblingRedTriangleReach (configuration : SixPointConfiguration)
+def blueSiblingRedTriangleReach (configuration : SixPointConfiguration E)
     (blueLabel redLabel : SixPointLabel) : ℝ :=
   dist (configuration .blue blueLabel) (configuration .red redLabel) +
     canonicalTriangleRadius (configuration .red .root) (configuration .red .left)
@@ -290,7 +292,7 @@ def siblingTriangleSplitDiameter (L M x : ℝ)
   max (2 * L) <| max (2 * M) <|
     max (x + triangleMaximum leftReach) (L - x + triangleMaximum rightReach)
 
-private theorem sameColorPair_le_twice_bound {configuration : SixPointConfiguration}
+private theorem sameColorPair_le_twice_bound {configuration : SixPointConfiguration E}
     (packing : SixPointPacking configuration) (i j : packing.support) (hcolor : i.1.1 = j.1.1)
     {bound : ℝ} (hbound : 1 ≤ bound)
     (hdist : dist (configuration i.1.1 i.1.2) (configuration j.1.1 j.1.2) ≤ bound) :
@@ -304,7 +306,7 @@ private theorem sameColorPair_le_twice_bound {configuration : SixPointConfigurat
 
 /-- The virtual diameter of support `67` is its explicit one-dimensional diameter. -/
 theorem redSiblingBlueTrianglePacking_virtualDiameter
-    (configuration : SixPointConfiguration) {L M x : ℝ}
+    (configuration : SixPointConfiguration E) {L M x : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hM : 1 ≤ M) (hx_lower : L - 1 ≤ x) (hx_upper : x ≤ 1)
@@ -464,7 +466,7 @@ theorem redSiblingBlueTrianglePacking_virtualDiameter
 
 /-- The virtual diameter of support `76` is its explicit one-dimensional diameter. -/
 theorem blueSiblingRedTrianglePacking_virtualDiameter
-    (configuration : SixPointConfiguration) {L M y : ℝ}
+    (configuration : SixPointConfiguration E) {L M y : ℝ}
     (hLdist : dist (configuration .red .left) (configuration .red .right) = L)
     (hMdist : dist (configuration .blue .left) (configuration .blue .right) = M)
     (hL : 1 ≤ L) (hM : 1 ≤ M) (hy_lower : M - 1 ≤ y) (hy_upper : y ≤ 1)

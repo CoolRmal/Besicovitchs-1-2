@@ -24,6 +24,8 @@ open scoped InnerProductSpace
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 private theorem norm_sub_sub_sq {E : Type*} [NormedAddCommGroup E]
     [InnerProductSpace ℝ E] (e x y : E) :
     ‖e - x - y‖ ^ 2 = ‖e‖ ^ 2 + ‖x‖ ^ 2 + ‖y‖ ^ 2 -
@@ -208,8 +210,8 @@ theorem gramCertificate_e1s0 {E : Type*} [NormedAddCommGroup E]
   nlinarith [e1s0_constant_neg]
 
 /-- The alternative positive separator is strictly negative for every admissible configuration. -/
-theorem endpointBalancedE1S0GramBound_of_admissible
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS) :
+theorem endpointBalancedE1S0GramBound_of_admissible [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS) :
     27 / 20 * diagonalMatchingReducedSlack configuration +
         17 / 8 * redEndpointReducedSlack configuration 1 +
         blueBalancedReducedSlack configuration 0 < 0 := by
@@ -240,8 +242,8 @@ theorem endpointBalancedE1S0GramBound_of_admissible
   nlinarith
 
 /-- The `E1/S0` endpoint/balanced representative is impossible. -/
-theorem not_redEndpoint_one_and_blueBalanced_zero
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem not_redEndpoint_one_and_blueBalanced_zero [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration) :
     ¬ (redSiblingTriangleFailure configuration (.endpoint 1) ∧
       blueSiblingTriangleFailure configuration (.balanced 0)) := by

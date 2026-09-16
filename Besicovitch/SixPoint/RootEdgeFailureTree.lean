@@ -23,18 +23,20 @@ noncomputable section
 
 namespace Besicovitch
 
+variable {E : Type*} [NormedAddCommGroup E]
+
 /-- The endpoint diameter target for the red root--second-child support. -/
-def redRootEdgeTarget (configuration : SixPointConfiguration) : ℝ :=
+def redRootEdgeTarget (configuration : SixPointConfiguration E) : ℝ :=
   barC * (dist (configuration .red .root) (configuration .red .right) +
     rootedTriangleTotalRadius configuration .blue)
 
 /-- The endpoint diameter target for the blue root--second-child support. -/
-def blueRootEdgeTarget (configuration : SixPointConfiguration) : ℝ :=
+def blueRootEdgeTarget (configuration : SixPointConfiguration E) : ℝ :=
   barC * (dist (configuration .blue .root) (configuration .blue .right) +
     rootedTriangleTotalRadius configuration .red)
 
 /-- Support `57`, with the red root--second-child radius split at `x`. -/
-def redRootEdgePackingAtEndpoint (configuration : SixPointConfiguration)
+def redRootEdgePackingAtEndpoint (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) (x : ℝ)
     (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .red .root) (configuration .red .right)) :
@@ -44,7 +46,7 @@ def redRootEdgePackingAtEndpoint (configuration : SixPointConfiguration)
     (h.child_distance .blue .left (by simp)) (h.child_distance .blue .right (by simp))
 
 /-- Support `75`, with the blue root--second-child radius split at `x`. -/
-def blueRootEdgePackingAtEndpoint (configuration : SixPointConfiguration)
+def blueRootEdgePackingAtEndpoint (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) (x : ℝ)
     (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .blue .root) (configuration .blue .right)) :
@@ -55,7 +57,7 @@ def blueRootEdgePackingAtEndpoint (configuration : SixPointConfiguration)
 
 /-- A feasible red root--edge split below its target gives nonnegative score. -/
 theorem redRootEdgePackingAtEndpoint_score_nonnegative
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS) (x : ℝ)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS) (x : ℝ)
     (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .red .root) (configuration .red .right))
     (hdiameter : rootEdgeSplitDiameter
@@ -77,7 +79,7 @@ theorem redRootEdgePackingAtEndpoint_score_nonnegative
 
 /-- A feasible blue root--edge split below its target gives nonnegative score. -/
 theorem blueRootEdgePackingAtEndpoint_score_nonnegative
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS) (x : ℝ)
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS) (x : ℝ)
     (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .blue .root) (configuration .blue .right))
     (hdiameter : rootEdgeSplitDiameter
@@ -98,14 +100,14 @@ theorem blueRootEdgePackingAtEndpoint_score_nonnegative
   simpa [blueRootEdgeTarget, rootedTriangleTotalRadius, mul_comm] using hdiameter
 
 /-- Every feasible split of support `57` has negative score. -/
-def RedRootEdgeFails (configuration : SixPointConfiguration)
+def RedRootEdgeFails (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) : Prop :=
   ∀ (x : ℝ) (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .red .root) (configuration .red .right)),
     (redRootEdgePackingAtEndpoint configuration h x hxZero hxEdge).score barS < 0
 
 /-- Every feasible split of support `75` has negative score. -/
-def BlueRootEdgeFails (configuration : SixPointConfiguration)
+def BlueRootEdgeFails (configuration : SixPointConfiguration E)
     (h : configuration.IsAdmissibleAt barS) : Prop :=
   ∀ (x : ℝ) (hxZero : 0 ≤ x)
     (hxEdge : x ≤ dist (configuration .blue .root) (configuration .blue .right)),
@@ -113,7 +115,7 @@ def BlueRootEdgeFails (configuration : SixPointConfiguration)
 
 /-- Failure of support `57` makes every feasible root--edge split exceed its target. -/
 theorem redRootEdge_split_failure
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hfailure : RedRootEdgeFails configuration h) :
     ∀ (x : ℝ) (_hxZero : 0 ≤ x)
       (_hxEdge : x ≤ dist (configuration .red .root) (configuration .red .right)),
@@ -129,7 +131,7 @@ theorem redRootEdge_split_failure
 
 /-- Failure of support `75` makes every feasible root--edge split exceed its target. -/
 theorem blueRootEdge_split_failure
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hfailure : BlueRootEdgeFails configuration h) :
     ∀ (x : ℝ) (_hxZero : 0 ≤ x)
       (_hxEdge : x ≤ dist (configuration .blue .root) (configuration .blue .right)),
@@ -155,7 +157,8 @@ private theorem barC_rootEdge_order_gap_pos : 2 < 4 * barC * (barC - 1) := by
 
 /-- The selected matching and blue coincident endpoint exclude the blue internal primitive. -/
 theorem SixPointConfiguration.blueRootEdgeInternalSlack_neg_of_matching_endpoint
-    (configuration : SixPointConfiguration) (h : configuration.IsAdmissibleAt barS)
+    [InnerProductSpace ℝ E]
+    (configuration : SixPointConfiguration E) (h : configuration.IsAdmissibleAt barS)
     (hmatching : 0 ≤ matchingFailureSlack barC
       (dist (configuration .red .left) (configuration .red .right))
       (dist (configuration .blue .left) (configuration .blue .right))
@@ -215,8 +218,8 @@ theorem SixPointConfiguration.blueRootEdgeInternalSlack_neg_of_matching_endpoint
 
 /-- On the selected endpoint branch, failure of the red root--edge support can only use one of
 the two child-labelled balanced terms. -/
-theorem redRootEdge_failure_routes_to_child_balanced
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem redRootEdge_failure_routes_to_child_balanced [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hendpoint : redSiblingTriangleFailure configuration (.endpoint 0))
     (hfailure : RedRootEdgeFails configuration h) :
@@ -383,8 +386,8 @@ theorem redRootEdge_failure_routes_to_child_balanced
     exact Or.inr hright
 
 /-- The color-reversed root--edge failure has the same two surviving balanced terms. -/
-theorem blueRootEdge_failure_routes_to_child_balanced
-    {configuration : SixPointConfiguration} (h : configuration.IsAdmissibleAt barS)
+theorem blueRootEdge_failure_routes_to_child_balanced [InnerProductSpace ℝ E]
+    {configuration : SixPointConfiguration E} (h : configuration.IsAdmissibleAt barS)
     (hmatching : SelectedDiagonalMatchingFails configuration)
     (hendpoint : blueSiblingTriangleFailure configuration (.endpoint 0))
     (hfailure : BlueRootEdgeFails configuration h) :

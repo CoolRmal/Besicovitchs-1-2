@@ -63,7 +63,8 @@ theorem weightedPairScore_le_of_separated {E : Type*} [NormedAddCommGroup E]
     · exact le_trans hl₁ (by exact_mod_cast hwU)
 
 /-- The Gram certificates prove the weighted geometric bound at the small rational weights. -/
-theorem weightedGeometricBound_gram : WeightedGeometricBound gramLambda gramMu := by
+theorem weightedGeometricBound_gram {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
+    WeightedGeometricBound E gramLambda gramMu := by
   intro e p₁ p₂ w₁ w₂ he hp₁ hp₂ hw₁ hw₂ hpChord hwChord
   have := weightedPairScore_le_of_separated e p₁ p₂ w₁ w₂ he hp₁ hp₂ hw₁ hw₂ hpChord
     hwChord
