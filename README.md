@@ -254,6 +254,14 @@ lake exe cache get
 lake build Solution Challenge
 ```
 
+Every push is also checked by the
+[Lean Comparator](https://github.com/leanprover/comparator) in continuous integration: the
+`comparator` job of the [Lean build workflow](../../actions/workflows/build.yml) builds the
+challenge and the solution inside the real `landrun` sandbox on a fresh runner, checks that every
+compared statement matches `Challenge.lean`, that only `propext`, `Quot.sound` and
+`Classical.choice` are used, and replays the solution through the Lean kernel. The tools are pinned
+to revisions matching Lean v4.32.0.
+
 From a warm Mathlib cache this takes about **2.5 minutes wall / 12 CPU-minutes** in total. The
 certificate-specific part is a small fraction of that:
 
