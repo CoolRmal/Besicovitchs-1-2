@@ -59,6 +59,9 @@ jobs:
       LANDRUN_REV: f59e83dbb4fd0af584dec5091168d0b35c8410b7
       LEAN4EXPORT_REV: 4e7915201d3f9f04470d9eae002fa695f7cdc589 # v4.32.0
       COMPARATOR_REV: 07bc4ea40f2266dcb861820a2ec1fa3244ed307f # toolchain v4.32.0
+      # Upstream fix, later than the v4.32.0 toolchain: pass `--` to landrun before the sandboxed
+      # command, so that the `--` in the lean4export arguments reaches lean4export.
+      COMPARATOR_SEPARATOR_FIX: 9badaf470d8f724346d33738bd273efacd78df76
     steps:
       - name: Check out the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -91,6 +94,7 @@ jobs:
           cp "$tools/lean4export/.lake/build/bin/lean4export" "$tools/bin/"
           git clone --quiet https://github.com/leanprover/comparator.git "$tools/comparator"
           git -C "$tools/comparator" checkout --quiet --detach "$COMPARATOR_REV"
+          git -C "$tools/comparator" cherry-pick --no-commit "$COMPARATOR_SEPARATOR_FIX"
           (cd "$tools/comparator" && lake build comparator)
           cp "$tools/comparator/.lake/build/bin/comparator" "$tools/bin/"
           echo "$tools/bin" >> "$GITHUB_PATH"
