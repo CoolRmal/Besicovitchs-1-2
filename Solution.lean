@@ -44,13 +44,6 @@ theorem sigma_one_plane_le_6934_div_10000 :
 theorem sStar_le_6934_div_10000 : sStar ≤ 6934 / 10000 :=
   sStar_le_6934_div_10000_certified
 
-/-- In every real inner product space, every density parameter above `6934 / 10000` satisfies the
-Besicovitch pair condition. -/
-theorem besicovitchPairCondition_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [MeasurableSpace E] [BorelSpace E] (β : ℝ)
-    (hβ : 6934 / 10000 < β) : BesicovitchPairCondition E β :=
-  besicovitchPairCondition_of_gt E hβ
-
 /-- In every finite-dimensional real inner product space, in particular in every `ℝⁿ`, each
 threshold above `6934 / 10000` forces one-rectifiability. -/
 theorem forcesOneRectifiability_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]

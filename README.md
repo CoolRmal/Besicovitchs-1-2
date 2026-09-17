@@ -3,17 +3,27 @@
 A Lean 4 + Mathlib formalization of
 
 $$
-\frac{1}{2} \le \sigma_1(\mathbb{R}^2) \le \frac{6934}{10000} = 0.6934 .
+\sigma_1(E) \le \frac{6934}{10000} = 0.6934
+\qquad\text{for every finite-dimensional real inner product space } E,
 $$
 
-The upper bound improves the published $0.7$; the lower bound is Besicovitch's classical one,
-formalized here so that the threshold is pinned to an explicit interval rather than merely
-bounded above. Both proofs are complete: `Solution.lean` contains no `sorry`, and every compared
-theorem depends on exactly the three axioms `propext`, `Classical.choice` and `Quot.sound`.
+in particular $\sigma_1(\mathbb{R}^n) \le 0.6934$ for **every** $n$, together with the planar lower
+bound
+
+$$
+\frac{1}{2} \le \sigma_1(\mathbb{R}^2) \le 0.6934 .
+$$
+
+The upper bound improves the published $0.7$, and it is not a planar statement: the same proof
+works verbatim in any finite dimension. The lower bound is Besicovitch's classical one, formalized
+here so that the planar threshold is pinned to an explicit interval rather than merely bounded
+above. All proofs are complete: `Solution.lean` contains no `sorry`, and every compared theorem
+depends on exactly the three axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 ```
-theorem Besicovitch.sigma_one_plane_le_6934_div_10000 :
-    sigmaOne (EuclideanSpace ℝ (Fin 2)) ≤ 6934 / 10000
+theorem Besicovitch.sigma_one_le_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] :
+    sigmaOne E ≤ 6934 / 10000
 theorem Besicovitch.one_half_le_sigma_one_plane :
     (1 / 2 : ℝ) ≤ sigmaOne (EuclideanSpace ℝ (Fin 2))
 ```
@@ -58,26 +68,31 @@ approach here is inspired by theirs.**
 
 ## What is compared
 
-Six statements, all proved in `Solution.lean`:
+Five statements, all proved in `Solution.lean`:
 
-- `sigma_one_plane_le_6934_div_10000` — the upper bound.
-- `forcesOneRectifiability_plane_of_gt` — every threshold strictly above $0.6934$ forces
-  rectifiability: genuine admissible thresholds, so the bound on the infimum is not vacuous.
-- `one_half_le_sigma_one_plane` — the lower bound. Together with the first it pins
+- `sigma_one_le_6934_div_10000` — the upper bound $\sigma_1(E) \le 0.6934$ for **every
+  finite-dimensional real inner product space** $E$, hence for every $\mathbb{R}^n$.
+- `forcesOneRectifiability_of_gt_6934_div_10000` — in every such $E$, every threshold strictly
+  above $0.6934$ forces rectifiability: genuine admissible thresholds, so the bound on the infimum
+  is not vacuous.
+- `sigma_one_plane_le_6934_div_10000` and `forcesOneRectifiability_plane_of_gt` — the same two
+  statements written out for the plane $\mathbb{R}^2$.
+- `one_half_le_sigma_one_plane` — the lower bound. Together with the upper bound it pins
   $\sigma_1(\mathbb{R}^2)$ to $[1/2, 0.6934]$; in particular the infimum is not the value Lean
   assigns to an empty set.
-- `besicovitchPairCondition_of_gt_6934_div_10000` — in **every** real inner product space, of any
-  dimension, the Besicovitch pair condition holds at every parameter above $0.6934$.
-- `forcesOneRectifiability_of_gt_6934_div_10000` and `sigma_one_le_6934_div_10000` — the same
-  rectifiability statement and upper bound in every finite-dimensional real inner product space,
-  in particular $\sigma_1(\mathbb{R}^n) \le 0.6934$ for every $n$.
-
-Nothing in the six-point argument is planar: the finite packing problem lives in the span of six
-points, and every certificate is a Gram-matrix inequality, so it holds in any inner product space.
-The step from the pair condition to rectifiability uses compactness of closed balls, hence the
-finite-dimensional hypothesis in the last two statements.
 
 `sigmaOne` is an infimum, not a minimum: nothing here claims it is attained.
+
+### Why the bound holds in every finite dimension
+
+Nothing in the upper-bound argument is planar. The finite packing problem involves six points,
+which always lie in a subspace of dimension at most five, and every certificate is a Gram-matrix
+inequality: it holds for vectors in any real inner product space, with no coordinates anywhere.
+The Besicovitch pair condition above $0.6934$ is in fact proved in every real inner product space,
+of any dimension (`Besicovitch.besicovitchPairCondition_of_gt` in
+`Besicovitch/Main/RationalBound.lean`). Only the final step, from the pair condition to
+rectifiability, uses finite dimension, through the compactness of closed balls and Carathéodory's
+theorem for convex hulls.
 
 ## The lower bound
 
@@ -253,14 +268,14 @@ To check the result yourself:
 
 ```sh
 echo 'import Solution
-#print axioms Besicovitch.sigma_one_plane_le_6934_div_10000' > /tmp/check.lean
+#print axioms Besicovitch.sigma_one_le_6934_div_10000' > /tmp/check.lean
 lake env lean /tmp/check.lean
 ```
 
 which prints
 
 ```
-'Besicovitch.sigma_one_plane_le_6934_div_10000' depends on axioms:
+'Besicovitch.sigma_one_le_6934_div_10000' depends on axioms:
   [propext, Classical.choice, Quot.sound]
 ```
 
@@ -270,14 +285,14 @@ The project is pinned to Lean and Mathlib `v4.32.0`.
 
 | path | contents |
 |---|---|
-| `Challenge.lean` | the problem statement, self-contained, with the theorem hole |
-| `Solution.lean` | the proved theorem |
+| `Challenge.lean` | the problem statements, self-contained, with the theorem holes |
+| `Solution.lean` | the proved theorems |
 | `Besicovitch/Statement.lean` | the same definitions, for the modular development |
 | `Besicovitch/SixPoint/GramCertificateCore.lean` | the local certificate theorem |
 | `Besicovitch/SixPoint/GramCertificateData.lean` | the thirty certificates and their checks |
 | `Besicovitch/SixPoint/GramCertificateCover.lean` | the eight-band radius cover |
 | `Besicovitch/SixPoint/GramWeightedBound.lean` | the coordinate-free weighted bound |
-| `Besicovitch/Main/RationalBound.lean` | the reduction to the density bound |
+| `Besicovitch/Main/RationalBound.lean` | the bound in every finite-dimensional inner product space |
 | `Besicovitch/Example/` | Besicovitch's set and the lower bound $1/2 \le \sigma_1$ |
 | `comparator.json` | permits only `propext`, `Quot.sound`, `Classical.choice` |
 

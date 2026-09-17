@@ -49,29 +49,6 @@ def ForcesOneRectifiability (X : Type*) [MetricSpace X] [MeasurableSpace X] [Bor
 def sigmaOne (X : Type*) [MetricSpace X] [MeasurableSpace X] [BorelSpace X] : ℝ :=
   sInf {β : ℝ | 0 ≤ β ∧ ForcesOneRectifiability X (ENNReal.ofReal β)}
 
-/-- The extended distance between two sets; it is infinite when either set is empty. -/
-def setEDist {X : Type*} [PseudoEMetricSpace X] (s t : Set X) : ℝ≥0∞ :=
-  ⨅ x ∈ s, ⨅ y ∈ t, edist x y
-
-/-- A measure is straight if every measurable set has mass at most its extended diameter. -/
-def IsStraightMeasure {E : Type*} [MetricSpace E] [MeasurableSpace E] (μ : Measure E) : Prop :=
-  ∀ s, MeasurableSet s → μ s ≤ Metric.ediam s
-
-/-- The Besicovitch pair condition at density parameter `β`. -/
-def BesicovitchPairCondition (E : Type*) [MetricSpace E] [MeasurableSpace E] (β : ℝ) : Prop :=
-  ∀ μ : Measure E, IsStraightMeasure μ →
-    ∃ τ : ℝ, 0 < τ ∧ ∀ scale : ℝ, 0 < scale →
-      ∃ δ : ℝ, 0 < δ ∧
-        ∀ e₁ e₂ : Set E,
-          MeasurableSet e₁ → MeasurableSet e₂ →
-          e₁.Nonempty → e₂.Nonempty → 0 < setEDist e₁ e₂ →
-          setEDist e₁ e₂ < ENNReal.ofReal δ →
-          (∀ x ∈ e₁ ∪ e₂, ∀ r : ℝ, 0 < r → r < scale →
-            ENNReal.ofReal (2 * β * r) < μ (Metric.ball x r)) →
-          ∃ v : Set E,
-            IsOpen v ∧ (v ∩ e₁).Nonempty ∧ (v ∩ e₂).Nonempty ∧
-            ENNReal.ofReal τ * Metric.ediam v < μ (v \ (e₁ ∪ e₂))
-
 /-- Every threshold strictly above `6934 / 10000` forces one-rectifiability in the plane. -/
 theorem forcesOneRectifiability_plane_of_gt (β : ℝ) (hβ : 6934 / 10000 < β) :
     ForcesOneRectifiability (EuclideanSpace ℝ (Fin 2)) (ENNReal.ofReal β) := by
@@ -90,14 +67,9 @@ theorem sigma_one_plane_le_6934_div_10000 :
 
 end Besicovitch
 
+-- Reopened so that the section variable `X` is out of scope and `E` receives the same universe
+-- name as in `Solution.lean`.
 namespace Besicovitch
-
-/-- In every real inner product space, every density parameter above `6934 / 10000` satisfies the
-Besicovitch pair condition. -/
-theorem besicovitchPairCondition_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [MeasurableSpace E] [BorelSpace E] (β : ℝ)
-    (hβ : 6934 / 10000 < β) : BesicovitchPairCondition E β := by
-  sorry
 
 /-- In every finite-dimensional real inner product space, in particular in every `ℝⁿ`, each
 threshold above `6934 / 10000` forces one-rectifiability. -/
