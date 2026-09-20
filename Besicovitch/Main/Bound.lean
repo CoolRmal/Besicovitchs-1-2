@@ -14,7 +14,7 @@ public import Besicovitch.Certificates.EndpointBridge
 # The six-point bound for the density threshold
 
 This file contains the analytic bridge from the finite six-point property to the upper bound on
-the rectifiability threshold of a finite-dimensional real normed space.  The finite property
+the rectifiability threshold of a separable complete real normed space. The finite property
 itself remains the sole geometric input.
 -/
 
@@ -24,11 +24,12 @@ noncomputable section
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+  [SecondCountableTopology E]
   [MeasurableSpace E] [BorelSpace E]
 
 /-- A positive subunit parameter satisfying the Besicovitch pair condition bounds the
-rectifiability threshold of a finite-dimensional real normed space. -/
+rectifiability threshold of a separable complete real normed space. -/
 theorem BesicovitchPairCondition.sigmaOne_le {s : ℝ} (hpair : BesicovitchPairCondition E s)
     (hs : 0 < s) (hs_one : s < 1) : sigmaOne E ≤ s := by
   apply sigmaOne_le_of_forall_gt E hs.le

@@ -12,9 +12,9 @@ public import Besicovitch.Measure.DensityBasic
 /-!
 # Localizing lower density to a straight subset
 
-At almost every point of a measurable subset, the complementary restriction is negligible
-relative to the restricted measure.  Straightness turns this relative differentiation statement
-into preservation of every strictly smaller lower-density bound.
+At almost every point of a straight measurable subset, the complementary restriction has
+ball mass `o(r)`. This metric differentiation statement preserves every strictly smaller
+lower-density bound without a finite-dimensional hypothesis.
 -/
 
 @[expose] public section
@@ -54,7 +54,7 @@ theorem le_lowerOneDensity_of_eventually_ball_measure_ge
 
 end Metric
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [MetricSpace E] [SecondCountableTopology E]
   [MeasurableSpace E] [BorelSpace E]
 
 /-- A straight measurable subset inherits every strictly smaller lower-density threshold almost
@@ -81,19 +81,6 @@ theorem ae_lt_lowerOneDensity_of_subset_of_straight
     refine Measure.MutuallySingular.mk (s := a) (t := aᶜ) ?_ ?_ (by simp)
     · simp [nu, Measure.restrict_apply ha]
     · simp [mu, Measure.restrict_apply ha.compl]
-  have hderiv_zero : nu.rnDeriv mu =ᵐ[mu] 0 :=
-    Measure.rnDeriv_eq_zero_of_mutuallySingular hsingular
-      Measure.AbsolutelyContinuous.rfl
-  have hratio := Besicovitch.ae_tendsto_rnDeriv nu mu
-  change ∀ᵐ x ∂mu, ENNReal.ofReal beta < lowerOneDensity a x
-  have hdensity_mu : ∀ᵐ x ∂mu,
-      ENNReal.ofReal gamma ≤ lowerOneDensity e x := hdensity
-  filter_upwards [hratio, hderiv_zero, hdensity_mu] with x hxratio hxzero hxe
-  have hxratio_zero : Tendsto
-      (fun r ↦ nu (Metric.closedBall x r) / mu (Metric.closedBall x r))
-      (𝓝[>] 0) (𝓝 0) := by
-    have hxzero' : nu.rnDeriv mu x = 0 := by simpa using hxzero
-    simpa only [hxzero'] using hxratio
   let theta := (beta + gamma) / 2
   let eta := (beta + theta) / 2
   let epsilon := theta - eta
@@ -114,43 +101,24 @@ theorem ae_lt_lowerOneDensity_of_subset_of_straight
   have hepsilon_pos : 0 < epsilon := by
     dsimp only [epsilon]
     linarith
+  have hsmall := ha_straight.ae_exists_scale_measure_closedBall_lt
+    hsingular (mul_pos (by norm_num : (0 : ℝ) < 2) hepsilon_pos)
+  change ∀ᵐ x ∂mu, ENNReal.ofReal beta < lowerOneDensity a x
+  have hdensity_mu : ∀ᵐ x ∂mu,
+      ENNReal.ofReal gamma ≤ lowerOneDensity e x := hdensity
+  filter_upwards [hsmall, hdensity_mu] with x hxsmall hxe
   have htheta_density : ENNReal.ofReal theta < lowerOneDensity e x :=
     ((ENNReal.ofReal_lt_ofReal_iff (hbeta.trans_lt hbeta_gamma)).2 htheta_gamma).trans_le hxe
   obtain ⟨densityScale, hdensityScale, hmass_e⟩ :=
     lowerOneDensity_eventually_ball_measure_gt htheta_nonneg htheta_density
-  have hratio_eventually : ∀ᶠ r in 𝓝[>] (0 : ℝ),
-      nu (Metric.closedBall x r) / mu (Metric.closedBall x r) <
-        ENNReal.ofReal epsilon :=
-    hxratio_zero.eventually (Iio_mem_nhds (ENNReal.ofReal_pos.2 hepsilon_pos))
-  obtain ⟨neighborhood, hneighborhood, hratio_on⟩ :=
-    mem_nhdsWithin_iff_exists_mem_nhds_inter.mp hratio_eventually
-  obtain ⟨ratioScale, hratioScale, hball_ratio⟩ :=
-    Metric.mem_nhds_iff.mp hneighborhood
+  obtain ⟨ratioScale, hratioScale, hsmall_on⟩ := hxsmall
   have hmass_a : ∀ r : ℝ, 0 < r → r < min densityScale ratioScale →
       ENNReal.ofReal (2 * eta * r) < μH[1] (a ∩ Metric.ball x r) := by
     intro r hr hrscale
     have hr_density : r < densityScale := hrscale.trans_le (min_le_left _ _)
     have hr_ratio : r < ratioScale := hrscale.trans_le (min_le_right _ _)
-    have hr_mem : r ∈ neighborhood ∩ Ioi (0 : ℝ) := by
-      refine ⟨hball_ratio ?_, hr⟩
-      simpa [Real.dist_eq, abs_of_pos hr] using hr_ratio
-    have hratio_le : nu (Metric.closedBall x r) ≤
-        ENNReal.ofReal epsilon * mu (Metric.closedBall x r) := by
-      apply (ENNReal.div_le_iff_le_mul
-        (Or.inr ENNReal.ofReal_ne_top)
-        (Or.inr (ENNReal.ofReal_pos.2 hepsilon_pos).ne')).mp
-      exact (hratio_on hr_mem).le
-    have hnu_le : nu (Metric.closedBall x r) ≤ ENNReal.ofReal (2 * epsilon * r) := by
-      calc
-        nu (Metric.closedBall x r) ≤
-            ENNReal.ofReal epsilon * mu (Metric.closedBall x r) := hratio_le
-        _ ≤ ENNReal.ofReal epsilon * ENNReal.ofReal (2 * r) := by
-          gcongr
-          exact ha_straight.measure_closedBall_le x r
-        _ = ENNReal.ofReal (2 * epsilon * r) := by
-          rw [← ENNReal.ofReal_mul hepsilon_pos.le]
-          congr 1
-          ring
+    have hnu_le : nu (Metric.closedBall x r) ≤ ENNReal.ofReal (2 * epsilon * r) :=
+      (hsmall_on r hr hr_ratio).le
     have he_subset : e ∩ Metric.ball x r ⊆
         (a ∩ Metric.ball x r) ∪ ((e \ a) ∩ Metric.closedBall x r) := by
       intro y hy

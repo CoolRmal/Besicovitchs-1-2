@@ -24,7 +24,8 @@ open scoped ENNReal MeasureTheory
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [MetricSpace E] [CompleteSpace E] [Nonempty E]
+  [SecondCountableTopology E]
   [MeasurableSpace E] [BorelSpace E]
 
 /-- A nonrectifiable finite set with density at least `gamma` contains a positive straight,

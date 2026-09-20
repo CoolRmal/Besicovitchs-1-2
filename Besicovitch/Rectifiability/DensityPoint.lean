@@ -6,12 +6,12 @@ Authors: Yongxi Lin
 module
 
 public import Besicovitch.Rectifiability.BadConvexThickening
-public import Mathlib.MeasureTheory.Covering.BesicovitchVectorSpace
+public import Besicovitch.Measure.StraightDifferentiation
 
 /-!
 # A density point outside the enlarged holes
 
-Lebesgue differentiation lets us choose the point outside the seven-diameter enlargements so that
+Metric differentiation lets us choose the point outside the seven-diameter enlargements so that
 the mass missing from the compact core is linearly small in every sufficiently small ball.
 -/
 
@@ -27,17 +27,6 @@ namespace Besicovitch
 section Metric
 
 variable {X : Type*} [MetricSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
-
-/-- A straight measure assigns at most `2r` mass to a closed ball of radius `r`. -/
-theorem IsStraightMeasure.measure_closedBall_le {mu : Measure X}
-    (hmu : IsStraightMeasure mu) (z : X) (r : ℝ) :
-    mu (Metric.closedBall z r) ≤ ENNReal.ofReal (2 * r) := by
-  apply (hmu _ measurableSet_closedBall).trans
-  apply Metric.ediam_le_of_forall_dist_le
-  intro x hx y hy
-  have hxz : dist x z ≤ r := Metric.mem_closedBall.mp hx
-  have hzy : dist z y ≤ r := by simpa [dist_comm] using Metric.mem_closedBall.mp hy
-  exact (dist_triangle x z y).trans (by linarith)
 
 /-- A lower ball-mass bound and a small loss outside the core leave a core point in the outer
 annulus. -/
@@ -134,7 +123,7 @@ theorem exists_scale_measure_ball_sdiff_lt
 
 end Metric
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SecondCountableTopology E]
   [MeasurableSpace E] [BorelSpace E]
 
 /-- One may choose the point outside all seven-diameter enlargements to be a density point of the
@@ -165,20 +154,24 @@ theorem exists_densityPoint_not_mem_sevenDiameterThickening
       rw [← hdecomposition]
       exact measure_mono inter_subset_right
     exact (not_le_of_gt hmeasure) hle
-  have hae := Besicovitch.ae_tendsto_measure_inter_div_of_measurableSet mu hF.compl
+  have hstraight : IsStraightMeasure (mu.restrict F) :=
+    fun s hs ↦ (Measure.restrict_apply_le _ _).trans (hmu s hs)
+  have hsingular : mu.restrict Fᶜ ⟂ₘ mu.restrict F := by
+    refine ⟨F, hF, ?_, ?_⟩ <;> simp [Measure.restrict_apply, hF, hF.compl]
+  have hae := hstraight.ae_exists_scale_measure_closedBall_lt hsingular hk
   have hae_remaining : ∀ᵐ z ∂mu.restrict (F \ U),
-      Tendsto (fun r ↦ mu (Fᶜ ∩ Metric.closedBall z r) / mu (Metric.closedBall z r))
-        (𝓝[>] 0) (𝓝 ((Fᶜ).indicator 1 z)) :=
-    ae_mono Measure.restrict_le_self hae
+      ∃ scale : ℝ, 0 < scale ∧ ∀ r : ℝ, 0 < r → r < scale →
+        (mu.restrict Fᶜ) (Metric.closedBall z r) < ENNReal.ofReal (k * r) :=
+    ae_mono (Measure.restrict_mono sdiff_subset le_rfl) hae
   obtain ⟨z, hz, hzdensity⟩ :=
     Measure.exists_mem_of_measure_ne_zero_of_ae hremaining_ne hae_remaining
-  have hindicator : (Fᶜ).indicator (1 : E → ℝ≥0∞) z = 0 := by
-    simp [hz.1]
-  rw [hindicator] at hzdensity
-  obtain ⟨scale, hscale, hsmall⟩ :=
-    exists_scale_measure_ball_sdiff_lt hmu hzdensity hk
-  refine ⟨z, hz.1, ?_, scale, hscale, hsmall⟩
-  intro V hzV
-  exact hz.2 (mem_iUnion_of_mem V hzV)
+  obtain ⟨scale, hscale, hsmall⟩ := hzdensity
+  refine ⟨z, hz.1, ?_, scale, hscale, ?_⟩
+  · intro V hzV
+    exact hz.2 (mem_iUnion_of_mem V hzV)
+  · intro r hr hrs
+    apply lt_of_le_of_lt ?_ (hsmall r hr hrs)
+    rw [Measure.restrict_apply measurableSet_closedBall]
+    exact measure_mono fun x hx ↦ ⟨Metric.ball_subset_closedBall hx.1, hx.2⟩
 
 end Besicovitch

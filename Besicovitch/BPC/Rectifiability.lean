@@ -28,7 +28,8 @@ open scoped ENNReal MeasureTheory Topology
 
 namespace Besicovitch
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+  [SecondCountableTopology E]
   [MeasurableSpace E] [BorelSpace E]
 
 /-- The Besicovitch pair condition at `sigma < 1` forces rectifiability at every strictly larger
