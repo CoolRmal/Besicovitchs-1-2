@@ -32,7 +32,7 @@ def compactAttachmentUnion (F : Set E)
   F ∪ ⋃ V : chosen, convexAttachment F (V : Set E)
 
 /-- Finite total hole diameter makes the full attachment union compact. -/
-theorem isCompact_compactAttachmentUnion [ProperSpace E] [Nontrivial E] [MeasurableSpace E]
+theorem isCompact_compactAttachmentUnion [CompleteSpace E] [Nontrivial E] [MeasurableSpace E]
     {mu : MeasureTheory.Measure E}
     {F : Set E} (hF : IsCompact F)
     {alpha : ℝ} (halpha : 0 < alpha) {chosen : Set (Set E)}

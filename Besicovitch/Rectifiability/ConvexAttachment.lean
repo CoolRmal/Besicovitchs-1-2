@@ -7,6 +7,7 @@ module
 
 public import Besicovitch.Rectifiability.BadConvexSets
 public import Mathlib.Topology.MetricSpace.Bounded
+public import Mathlib.Analysis.Convex.TotallyBounded
 
 /-!
 # Compact convex attachments
@@ -39,13 +40,10 @@ theorem convex_convexAttachment (F V : Set E) :
   (convex_convexHull ℝ (F ∩ diameterThickening 2 V)).closure
 
 /-- Attachments to a compact core are compact. -/
-theorem isCompact_convexAttachment [ProperSpace E] {F V : Set E} (hF : IsCompact F) :
+theorem isCompact_convexAttachment [CompleteSpace E] {F V : Set E} (hF : IsCompact F) :
     IsCompact (convexAttachment F V) := by
-  apply Metric.isCompact_iff_isClosed_bounded.2
-  refine ⟨isClosed_convexAttachment F V, ?_⟩
-  apply Bornology.IsBounded.closure
-  rw [isBounded_convexHull]
-  exact hF.isBounded.subset inter_subset_left
+  exact (totallyBounded_convexHull E
+    (hF.totallyBounded.subset inter_subset_left)).closure.isCompact_of_isClosed isClosed_closure
 
 /-- Every core point already in a hole belongs to its attachment. -/
 theorem inter_subset_convexAttachment {F V : Set E}
@@ -102,7 +100,7 @@ theorem convexAttachment_subset_diameterThickening_three {F V : Set E}
       · nlinarith
 
 /-- A bad hole has a nonempty compact connected attachment. -/
-theorem convexAttachment_isCompact_isConnected [ProperSpace E] [Nontrivial E]
+theorem convexAttachment_isCompact_isConnected [CompleteSpace E] [Nontrivial E]
     [MeasurableSpace E] {mu : MeasureTheory.Measure E}
     {F V : Set E} {alpha : ℝ} (hF : IsCompact F)
     (halpha : 0 < alpha) (hV : V ∈ badConvexSets mu F alpha) :

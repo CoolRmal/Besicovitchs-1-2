@@ -39,7 +39,7 @@ def localAttachmentComponent (F : Set E)
 
 /-- A BPC separation forces the local attachment component to have diameter at least
 `sigma * rho / 2`. -/
-theorem sigma_mul_radius_div_two_le_diam_localAttachmentComponent [ProperSpace E]
+theorem sigma_mul_radius_div_two_le_diam_localAttachmentComponent [CompleteSpace E]
     [Nontrivial E] [MeasurableSpace E] [OpensMeasurableSpace E] {mu : Measure E}
     {F : Set E} (hF : IsCompact F) {alpha tau sigma gamma : ℝ}
     (halpha : 0 < alpha) (halpha_tau : alpha ≤ tau) (hsigma : 0 ≤ sigma)
