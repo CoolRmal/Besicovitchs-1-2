@@ -12,7 +12,7 @@ public import Mathlib.MeasureTheory.Measure.Hausdorff
 public import Mathlib.Order.ConditionallyCompleteLattice.Indexed
 
 /-!
-# Challenge: the planar Besicovitch threshold
+# Challenge: the Besicovitch threshold in real Hilbert spaces
 
 Every transparent definition occurring in the theorem statements, and the statements.
 -/
@@ -71,17 +71,17 @@ end Besicovitch
 -- name as in `Solution.lean`.
 namespace Besicovitch
 
-/-- In every finite-dimensional real inner product space, in particular in every `ℝⁿ`, each
-threshold above `6934 / 10000` forces one-rectifiability. -/
+/-- In every real Hilbert space, without a separability assumption, each threshold above
+`6934 / 10000` forces one-rectifiability. -/
 theorem forcesOneRectifiability_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    [InnerProductSpace ℝ E] [CompleteSpace E] [MeasurableSpace E] [BorelSpace E]
     (β : ℝ) (hβ : 6934 / 10000 < β) : ForcesOneRectifiability E (ENNReal.ofReal β) := by
   sorry
 
-/-- The threshold of every finite-dimensional real inner product space, in particular
-of every `ℝⁿ`, is at most `6934 / 10000`. -/
+/-- The threshold of every real Hilbert space, including nonseparable ones,
+is at most `6934 / 10000`. -/
 theorem sigma_one_le_6934_div_10000 (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] :
+    [CompleteSpace E] [MeasurableSpace E] [BorelSpace E] :
     sigmaOne E ≤ 6934 / 10000 := by
   sorry
 

@@ -3,26 +3,26 @@
 A Lean 4 + Mathlib formalization of
 
 $$
-\sigma_1(E) \le \frac{6934}{10000} = 0.6934
-\qquad\text{for every finite-dimensional real inner product space } E,
+\sigma_1(H) \le \frac{6934}{10000} = 0.6934
+\qquad\text{for every real Hilbert space } H,
 $$
 
-in particular $\sigma_1(\mathbb{R}^n) \le 0.6934$ for **every** $n$, together with the planar lower
-bound
+with no finite-dimensionality or separability assumption. This includes every Euclidean space,
+and is accompanied by the planar lower bound
 
 $$
 \frac{1}{2} \le \sigma_1(\mathbb{R}^2) \le 0.6934 .
 $$
 
-The upper bound improves the published $0.7$, and it is not a planar statement: the same proof
-works verbatim in any finite dimension. The lower bound is Besicovitch's classical one, formalized
+The upper bound improves the published planar bound of 0.7 and applies in every real Hilbert space.
+The lower bound is Besicovitch's classical one, formalized
 here so that the planar threshold is pinned to an explicit interval rather than merely bounded
 above. All proofs are complete: `Solution.lean` contains no `sorry`, and every compared theorem
 depends on exactly the three axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 ```
 theorem Besicovitch.sigma_one_le_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] :
+    [InnerProductSpace ℝ E] [CompleteSpace E] [MeasurableSpace E] [BorelSpace E] :
     sigmaOne E ≤ 6934 / 10000
 theorem Besicovitch.one_half_le_sigma_one_plane :
     (1 / 2 : ℝ) ≤ sigmaOne (EuclideanSpace ℝ (Fin 2))
@@ -70,8 +70,8 @@ approach here is inspired by theirs.**
 
 Five statements, all proved in `Solution.lean`:
 
-- `sigma_one_le_6934_div_10000` — the upper bound $\sigma_1(E) \le 0.6934$ for **every
-  finite-dimensional real inner product space** $E$, hence for every $\mathbb{R}^n$.
+- `sigma_one_le_6934_div_10000` — the upper bound of 0.6934 for **every real Hilbert space**,
+  including infinite-dimensional and nonseparable ones.
 - `forcesOneRectifiability_of_gt_6934_div_10000` — in every such $E$, every threshold strictly
   above $0.6934$ forces rectifiability: genuine admissible thresholds, so the bound on the infimum
   is not vacuous.
@@ -83,16 +83,26 @@ Five statements, all proved in `Solution.lean`:
 
 `sigmaOne` is an infimum, not a minimum: nothing here claims it is attained.
 
-### Why the bound holds in every finite dimension
+### Why the bound holds in every real Hilbert space
 
 Nothing in the upper-bound argument is planar. The finite packing problem involves six points,
 which always lie in a subspace of dimension at most five, and every certificate is a Gram-matrix
 inequality: it holds for vectors in any real inner product space, with no coordinates anywhere.
-The Besicovitch pair condition above $0.6934$ is in fact proved in every real inner product space,
-of any dimension (`Besicovitch.besicovitchPairCondition_of_gt` in
-`Besicovitch/Main/RationalBound.lean`). Only the final step, from the pair condition to
-rectifiability, uses finite dimension, through the compactness of closed balls and Carathéodory's
-theorem for convex hulls.
+The Besicovitch pair condition above 0.6934 is proved in every real inner product space, even
+without completeness (`Besicovitch.besicovitchPairCondition_of_gt` in
+`Besicovitch/Main/RationalBound.lean`). The final rectifiability argument now uses:
+
+- the metric five-ball covering lemma to differentiate measures singular to a straight measure;
+- compactness of closed convex hulls of compact sets in complete normed spaces, for continuum
+  parametrization and surgery;
+- separability of every finite-length set and its closed linear span, followed by isometric
+  transport back to the ambient Hilbert space.
+
+Completeness cannot simply be deleted with this repository's definition of rectifiability,
+which uses curves defined on the whole real line. An incomplete inner-product space can contain
+a relatively closed Bernstein subset of a smooth arc with density 1 that meets every global
+Lipschitz curve in a null set. The mathematical construction (not itself formalized in Lean) is
+documented in [the Hilbert-space extension note](effort/HILBERT_SPACE_PLAN.md).
 
 ## The lower bound
 
@@ -300,7 +310,7 @@ The project is pinned to Lean and Mathlib `v4.32.0`.
 | `Besicovitch/SixPoint/GramCertificateData.lean` | the thirty certificates and their checks |
 | `Besicovitch/SixPoint/GramCertificateCover.lean` | the eight-band radius cover |
 | `Besicovitch/SixPoint/GramWeightedBound.lean` | the coordinate-free weighted bound |
-| `Besicovitch/Main/RationalBound.lean` | the bound in every finite-dimensional inner product space |
+| `Besicovitch/Main/RationalBound.lean` | the bound in every real Hilbert space, without separability |
 | `Besicovitch/Example/` | Besicovitch's set and the lower bound $1/2 \le \sigma_1$ |
 | `comparator.json` | permits only `propext`, `Quot.sound`, `Classical.choice` |
 

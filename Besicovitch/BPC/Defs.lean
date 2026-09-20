@@ -11,7 +11,7 @@ public import Besicovitch.Statement
 # The Besicovitch pair condition
 
 This file defines straight measures and the pair condition in a metric measurable space.  The
-rectifiability consequences are developed for finite-dimensional real normed spaces, and the
+rectifiability consequences are developed for separable complete real normed spaces, and the
 six-point transfer establishes the condition in real inner product spaces.
 -/
 

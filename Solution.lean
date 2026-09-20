@@ -10,12 +10,15 @@ public import Besicovitch.Example.LowerBound
 public import Besicovitch.Main.RationalBound
 
 /-!
-# Solution: the planar Besicovitch threshold
+# Solution: the Besicovitch threshold in real Hilbert spaces
 
 The planar bound follows from the six-point finite property at `6934/10000`, which the thirty
 Gram certificates establish.  The same argument forces one-rectifiability at every threshold
 above that constant.  The companion bound records that the exact six-point endpoint lies below the
 same rational number.
+
+The general upper-bound declarations apply to every real Hilbert space, without separability.
+The proof reduces finite-length sets to their separable closed linear spans.
 -/
 
 @[expose] public section
@@ -44,17 +47,17 @@ theorem sigma_one_plane_le_6934_div_10000 :
 theorem sStar_le_6934_div_10000 : sStar ≤ 6934 / 10000 :=
   sStar_le_6934_div_10000_certified
 
-/-- In every finite-dimensional real inner product space, in particular in every `ℝⁿ`, each
-threshold above `6934 / 10000` forces one-rectifiability. -/
+/-- In every real Hilbert space, without a separability assumption, each threshold above
+`6934 / 10000` forces one-rectifiability. -/
 theorem forcesOneRectifiability_of_gt_6934_div_10000 (E : Type*) [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    [InnerProductSpace ℝ E] [CompleteSpace E] [MeasurableSpace E] [BorelSpace E]
     (β : ℝ) (hβ : 6934 / 10000 < β) : ForcesOneRectifiability E (ENNReal.ofReal β) :=
   forcesOneRectifiability_of_gt E hβ
 
-/-- The threshold of every finite-dimensional real inner product space, in particular
-of every `ℝⁿ`, is at most `6934 / 10000`. -/
+/-- The threshold of every real Hilbert space, including nonseparable ones,
+is at most `6934 / 10000`. -/
 theorem sigma_one_le_6934_div_10000 (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] :
+    [CompleteSpace E] [MeasurableSpace E] [BorelSpace E] :
     sigmaOne E ≤ 6934 / 10000 :=
   sigmaOne_le_6934_div_10000 E
 

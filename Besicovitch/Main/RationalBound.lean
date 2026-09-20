@@ -7,6 +7,8 @@ module
 
 public import Besicovitch.Main.Bound
 public import Besicovitch.SixPoint.GramWeightedBound
+public import Besicovitch.Measure.HausdorffSeparable
+public import Besicovitch.Rectifiability.Isometry
 
 /-!
 # The rational bound in every real inner product space
@@ -14,9 +16,10 @@ public import Besicovitch.SixPoint.GramWeightedBound
 The Gram certificates give the weighted geometric bound at the small rational weights, the finite
 failure tree turns that into the six-point finite property at `barS = 6934/10000`, and the
 six-point transfer turns that into the Besicovitch pair condition and the rectifiability bound.
-None of these steps uses the dimension: the pair condition holds in every real inner product
-space, and the bound on `sigmaOne` in every finite-dimensional one.  The planar statements are
-the instances at `EuclideanSpace ℝ (Fin 2)`.
+The pair condition holds in every real inner product space. The bound on `sigmaOne` holds in
+every complete real inner product space, without a separability assumption: each finite-length
+set lies in a separable closed linear subspace. The planar statements are the instances at
+`EuclideanSpace ℝ (Fin 2)`.
 -/
 
 @[expose] public section
@@ -42,20 +45,30 @@ theorem besicovitchPairCondition_of_gt {β : ℝ} (hβ : 6934 / 10000 < β) :
     BesicovitchPairCondition E β :=
   (sixPointFiniteProperty_barS E).besicovitchPairCondition barS_pos (by rwa [barS_eq])
 
-variable [FiniteDimensional ℝ E]
+variable [CompleteSpace E]
 
-/-- Every threshold above `6934 / 10000` forces one-rectifiability in a finite-dimensional real
-inner product space. -/
+/-- Every threshold above `6934 / 10000` forces one-rectifiability in a real Hilbert space,
+without any separability assumption. -/
 theorem forcesOneRectifiability_of_gt {β : ℝ} (hβ : 6934 / 10000 < β) :
-    ForcesOneRectifiability E (ENNReal.ofReal β) :=
-  (sixPointFiniteProperty_barS E).forcesOneRectifiability_of_gt barS_pos barS_lt_one
-    (by rwa [barS_eq])
+    ForcesOneRectifiability E (ENNReal.ofReal β) := by
+  intro s hs hfinite hdensity
+  let K := (Submodule.span ℝ s).topologicalClosure
+  have hsep : TopologicalSpace.IsSeparable (K : Set E) :=
+    (isSeparable_of_hausdorffMeasure_lt_top hfinite).span.closure
+  letI : TopologicalSpace.SeparableSpace K := hsep.separableSpace
+  have hforce : ForcesOneRectifiability K (ENNReal.ofReal β) :=
+    (sixPointFiniteProperty_barS K).forcesOneRectifiability_of_gt barS_pos barS_lt_one
+      (by rwa [barS_eq])
+  apply rectifiable_of_forcesOneRectifiability_of_isometry
+    (isometry_subtype_coe (s := (K : Set E))) hforce hs ?_ hfinite hdensity
+  intro x hx
+  exact ⟨⟨x, subset_closure (Submodule.subset_span hx)⟩, rfl⟩
 
-/-- The one-dimensional rectifiability threshold of a finite-dimensional real inner product space
-is at most `6934 / 10000`. -/
+/-- The one-dimensional rectifiability threshold of every real Hilbert space is at most
+`6934 / 10000`, including nonseparable Hilbert spaces. -/
 theorem sigmaOne_le_6934_div_10000 : sigmaOne E ≤ 6934 / 10000 := by
-  simpa only [barS_eq] using sigmaOne_le_barS_of_sixPointFiniteProperty
-    (sixPointFiniteProperty_barS E)
+  exact sigmaOne_le_of_forall_gt E (by norm_num)
+    fun _ hβ ↦ forcesOneRectifiability_of_gt E hβ
 
 end InnerProductSpace
 

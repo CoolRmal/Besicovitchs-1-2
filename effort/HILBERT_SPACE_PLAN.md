@@ -70,20 +70,27 @@ completeness under the repository's definitions.
 Passing to the completion does not fix this example: S is not Borel in the
 completion, and curves in the completion need not take values in V.
 
-## Proof work
+## Formalized proof
 
 The six-point estimate and its transfer to the Besicovitch pair condition already
 work in arbitrary real inner-product spaces, without completeness or separability.
-The extension work is in the measure-to-rectifiability argument:
+The extension is in the measure-to-rectifiability argument:
 
-- Replace proper-space compactness by compactness of closed convex hulls of compact
-  sets in complete normed spaces.
-- Generalize the finite-length continuum parametrization and countable surgery.
-- Replace finite-dimensional measure differentiation by an appropriate metric
-  covering argument for straight measures.
-- Reduce finite-length sets in a possibly nonseparable Hilbert space to a closed
-  separable linear subspace.
-- Strengthen the challenge and solution declarations together, build all targets,
-  and verify the unchanged-definition comparison in the Linux comparator job.
+- `Geometry/CompactConvexHull.lean` proves compactness of closed convex hulls of compact
+  sets in complete normed spaces. Attachments, finite-length continuum parametrization,
+  and countable surgery now use completeness instead of finite dimensionality.
+- `Measure/StraightDifferentiation.lean` proves the required small-ball estimate by
+  the metric five-ball covering theorem. This replaces finite-dimensional measure
+  differentiation in density localization and the choice of a density point.
+- `Measure/HausdorffSeparable.lean` proves separability of finite-length sets directly
+  from countable Hausdorff covers. `Rectifiability/Isometry.lean` transports density
+  and rectifiability isometrically.
+- `Main/RationalBound.lean` applies the separable Banach-space bridge to the closed
+  linear span of each finite-length set, then transports the curves back.
+- `Challenge.lean` and `Solution.lean` now use `CompleteSpace` rather than
+  `FiniteDimensional` in both general declarations. The definitions and comparator
+  configuration are unchanged.
 
-This checklist records the intended extension, not a claim that it is complete.
+All three local targets (`Besicovitch`, `Challenge`, and `Solution`) build. The five
+compared solution declarations use only `propext`, `Classical.choice`, and `Quot.sound`.
+The Linux GitHub Actions comparator job independently checks the submitted declarations.

@@ -4,7 +4,7 @@ project:
   name: A machine-checked bound of 0.6934 for Besicovitch's 1/2-problem
   description: |-
     Besicovitch's 1/2-conjecture asserts that a Borel set in the plane with finite one-dimensional Hausdorff measure whose lower density exceeds 1/2 almost everywhere is countably 1-rectifiable. Writing sigma_1(R^2) for the least threshold that forces countable 1-rectifiability, the conjecture is sigma_1(R^2) = 1/2. The previously published record is sigma_1(R^2) <= 7/10, obtained by De Lellis, Glaudo, Massaccesi and Vittone.
-    This development proves, with a complete Lean 4 proof term, sigma_1(R^2) <= 6934/10000 = 0.6934.
+    This development proves, with a complete Lean 4 proof term, sigma_1(H) <= 6934/10000 = 0.6934 for every real Hilbert space H, without finite-dimensionality or separability assumptions.
   authors:
   - Yongxi Lin
   license: Apache-2.0
@@ -87,7 +87,7 @@ sources:
 related_formalizations: []
 status:
   scope: |-
-    Formalized in full: sigma_1(E) <= 6934/10000 for every finite-dimensional real inner product space E, in particular for every R^n, stated as Besicovitch.sigma_one_le_6934_div_10000; its planar case is Besicovitch.sigma_one_plane_le_6934_div_10000 over EuclideanSpace R (Fin 2). sigma_1 is defined inside Challenge.lean as the infimum of the thresholds that force countable 1-rectifiability. The proof term is complete and uses only propext, Classical.choice and Quot.sound. The supporting chain is formalized too: the geometric measure theory layer, the Besicovitch pair condition, the six-point transfer, the packing failure tree, the thirty Gram certificates and the radius cover.
+    Formalized in full: sigma_1(E) <= 6934/10000 for every real Hilbert space E, without a separability assumption, in particular for every R^n, stated as Besicovitch.sigma_one_le_6934_div_10000; its planar case is Besicovitch.sigma_one_plane_le_6934_div_10000 over EuclideanSpace R (Fin 2). sigma_1 is defined inside Challenge.lean as the infimum of the thresholds that force countable 1-rectifiability. The proof term is complete and uses only propext, Classical.choice and Quot.sound. The supporting chain is formalized too: the geometric measure theory layer, the Besicovitch pair condition, the six-point transfer, the packing failure tree, the thirty Gram certificates and the radius cover.
     Deliberately not formalized, and the reason. The sharp constant of the two-colour six-centre problem is an algebraic number theta_6 = 0.693306421825904872690678414403710951..., and the bound proved here exceeds it by about 9.36e-5. The obstruction is not mathematical but certificate-theoretic: at theta_6 the extremal configuration is attained, three structurally different packing mechanisms tie simultaneously, and the weighted score is exactly zero at an interior point with vanishing gradient, so no strict certificate of the shape used here exists there. Moving the chord to the rational value 3467/2500 breaks every tie and raises the available margin from about 1e-8 to about 5.8e-4, which is what makes a fixed family of thirty certificates sufficient. The constant is also bounded above: the routing separators that prune the case tree fail once the chord exceeds about 1.386850, so the admissible window is narrow and 6934/10000 sits inside it.
     Formalized in full as a compared theorem: the lower bound 1/2 <= sigma_1(R^2), Besicovitch.one_half_le_sigma_one_plane, by exhibiting Besicovitch's purely unrectifiable graph with lower density at least 1/2 at every interior point. Mathlib contains no notion of rectifiability and no purely unrectifiable set, so the example and all three of its properties are constructed here from scratch (Besicovitch/Example/). What is not proved about the example: the matching upper density bound 1/2 (Capdevila's part D) and the sharp equality of the graph's Hausdorff measure with its base measure; neither is needed for the bound, and the crude constant 2 is used instead.
     Also not formalized: Besicovitch's conjecture itself, which remains open; no claim is made about it. The six-point method cannot reach below theta_6 however it is certified, so this development does not approach 1/2.
@@ -544,14 +544,14 @@ alignment:
     note: |-
       Compared declaration. The genuine admissible thresholds behind the infimum bound; stated with strict inequality because the argument yields a margin and nothing is claimed at the constant itself.
   - source: |-
-      The threshold of every finite-dimensional real inner product space E, in particular of every R^n, is at most 6934/10000
+      The threshold of every real Hilbert space E, including nonseparable ones, is at most 6934/10000
     lean: Besicovitch.sigma_one_le_6934_div_10000
     module: Solution
     status: proved
     note: |-
-      Compared declaration. The six-point argument uses only Gram-matrix inequalities, so it holds in every real inner product space; finite dimension enters only in the step from the pair condition to rectifiability.
+      Compared declaration. The six-point argument uses only Gram-matrix inequalities. Metric differentiation, compact closed convex hulls, and reduction to a separable closed linear span give the rectifiability conclusion without finite-dimensionality or separability assumptions. Completeness remains necessary for the repository's global-curve definition; see effort/HILBERT_SPACE_PLAN.md for the non-formalized obstruction in incomplete spaces.
   - source: |-
-      In every finite-dimensional real inner product space, every threshold strictly above 6934/10000 forces one-rectifiability
+      In every real Hilbert space, every threshold strictly above 6934/10000 forces one-rectifiability
     lean: Besicovitch.forcesOneRectifiability_of_gt_6934_div_10000
     module: Solution
     status: proved
