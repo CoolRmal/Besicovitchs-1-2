@@ -103,7 +103,7 @@ theorem openConvexHull_mem_badConvexSets {mu : Measure E}
       measure_mono (sdiff_subset_sdiff hsubset Subset.rfl)
 
 /-- The bad convex sets have a countable disjoint scale-dominating subfamily. -/
-theorem exists_countable_disjoint_badConvexSets [FiniteDimensional ℝ E] [Nontrivial E]
+theorem exists_countable_disjoint_badConvexSets [TopologicalSpace.SeparableSpace E] [Nontrivial E]
     {mu : Measure E} [IsFiniteMeasure mu]
     (F : Set E) {alpha : ℝ} (halpha : 0 < alpha) :
     ∃ chosen ⊆ badConvexSets mu F alpha, chosen.PairwiseDisjoint id ∧ chosen.Countable ∧

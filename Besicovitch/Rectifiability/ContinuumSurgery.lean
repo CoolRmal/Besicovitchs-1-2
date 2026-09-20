@@ -5,13 +5,13 @@ Authors: Yongxi Lin
 -/
 module
 
+public import Besicovitch.Geometry.CompactConvexHull
 public import Besicovitch.Rectifiability.Continuum
 public import Besicovitch.Statement
 public import Mathlib.Analysis.Convex.Hull
 import Besicovitch.Topology.ConnectedComponent
 import Besicovitch.Rectifiability.HoleMerging
 import Mathlib.Topology.MetricSpace.Closeds
-import Mathlib.Analysis.Convex.Caratheodory
 
 /-!
 # Surgery on continua
@@ -457,106 +457,6 @@ theorem exists_oneHoleSurgery
         · exact hausdorffMeasure_brokenSegment_lt hUbounded
             haClosureU hbClosureU hepsilon hac
 
-/-- Barycenters of `finrank ℝ E + 1` points of `C`, which exhaust its convex hull by
-Carathéodory's theorem. -/
-private def caratheodoryBarycenters (C : Set E) : Set E :=
-  (fun p : stdSimplex ℝ (Fin (Module.finrank ℝ E + 1)) ×
-      (Fin (Module.finrank ℝ E + 1) → C) ↦ ∑ i, p.1.1 i • (p.2 i : E)) '' univ
-
-omit [MeasurableSpace E] [BorelSpace E] in
-private theorem exists_caratheodoryBarycenter {C : Set E} (hC : C.Nonempty) {N : ℕ}
-    {t : Finset E} (htC : (t : Set E) ⊆ C) {w : E → ℝ}
-    (hw : ∀ y ∈ t, 0 ≤ w y) (hwsum : ∑ y ∈ t, w y = 1)
-    (hcard : Fintype.card t ≤ N) :
-    ∃ p : stdSimplex ℝ (Fin N) × (Fin N → C),
-      ∑ i, p.1.1 i • (p.2 i : E) = ∑ y ∈ t, w y • y := by
-  let e : t ↪ Fin N :=
-    Classical.choice (Function.Embedding.nonempty_of_card_le (by simpa using hcard))
-  let weight : Fin N → ℝ := Function.extend e (fun q : t ↦ w q) 0
-  let point : Fin N → C :=
-    Function.extend e (fun q : t ↦ ⟨q, htC q.property⟩) (fun _ ↦ ⟨hC.some, hC.some_mem⟩)
-  have hweight_apply (q : t) : weight (e q) = w q := by simp [weight, Function.extend]
-  have hpoint_apply (q : t) : (point (e q) : E) = q := by
-    simp [point, Function.extend]
-  have hweight_zero {i : Fin N} (hi : i ∉ Finset.univ.map e) : weight i = 0 := by
-    apply Function.extend_apply'
-    simpa only [Finset.mem_map, Finset.mem_univ, true_and, not_exists] using hi
-  have hweightsum : ∑ i, weight i = 1 := by
-    calc
-      (∑ i, weight i) = (∑ i ∈ Finset.univ.map e, weight i) := by
-        symm
-        apply Finset.sum_subset (by simp)
-        intro i _ hi
-        exact hweight_zero hi
-      _ = (∑ q : t, weight (e q)) := Finset.sum_map (Finset.univ : Finset t) e weight
-      _ = (∑ q : t, w q) := by simp only [hweight_apply]
-      _ = (∑ y ∈ t, w y) := Finset.sum_coe_sort t w
-      _ = 1 := hwsum
-  have hweight_nonneg (i : Fin N) : 0 ≤ weight i := by
-    by_cases hi : i ∈ Finset.univ.map e
-    · obtain ⟨q, -, rfl⟩ := Finset.mem_map.mp hi
-      exact hweight_apply q ▸ hw q q.property
-    · rw [hweight_zero hi]
-  let weights : stdSimplex ℝ (Fin N) := ⟨weight, hweight_nonneg, hweightsum⟩
-  refine ⟨(weights, point), ?_⟩
-  calc
-    (∑ i, weight i • (point i : E)) =
-        (∑ i ∈ Finset.univ.map e, weight i • (point i : E)) := by
-      symm
-      apply Finset.sum_subset (by simp)
-      intro i _ hi
-      rw [hweight_zero hi, zero_smul]
-    _ = (∑ q : t, weight (e q) • (point (e q) : E)) :=
-      Finset.sum_map (Finset.univ : Finset t) e _
-    _ = (∑ q : t, w q • (q : E)) := by
-      apply Finset.sum_congr rfl
-      intro q _
-      rw [hweight_apply, hpoint_apply]
-    _ = (∑ y ∈ t, w y • y) := by
-      simpa using Finset.sum_coe_sort t (fun y : E ↦ w y • y)
-
-omit [MeasurableSpace E] [BorelSpace E] in
-private theorem convexHull_eq_caratheodoryBarycenters [FiniteDimensional ℝ E]
-    {C : Set E} (hC : C.Nonempty) :
-    convexHull ℝ C = caratheodoryBarycenters C := by
-  apply Subset.antisymm
-  · intro z hz
-    rw [convexHull_eq_union] at hz
-    simp only [mem_iUnion, exists_prop] at hz
-    obtain ⟨t, htC, htAffine, hzt⟩ := hz
-    rw [Finset.mem_convexHull'] at hzt
-    obtain ⟨w, hw, hwsum, hwz⟩ := hzt
-    have hcard : Fintype.card t ≤ Module.finrank ℝ E + 1 := by
-      calc
-        Fintype.card t ≤
-            Module.finrank ℝ (vectorSpan ℝ (range ((↑) : t → E))) + 1 :=
-          htAffine.card_le_finrank_succ
-        _ ≤ Module.finrank ℝ E + 1 :=
-          Nat.add_le_add_right (Submodule.finrank_le _) 1
-    obtain ⟨p, hp⟩ := exists_caratheodoryBarycenter hC htC hw hwsum hcard
-    exact ⟨p, mem_univ _, by simpa [caratheodoryBarycenters, hwz] using hp⟩
-  · rintro z ⟨p, -, rfl⟩
-    change (∑ i, p.1.1 i • (p.2 i : E)) ∈ convexHull ℝ C
-    rw [← Finset.centerMass_eq_of_sum_1 Finset.univ
-      (fun i ↦ (p.2 i : E)) p.1.2.2]
-    exact Finset.univ.centerMass_mem_convexHull (fun i _ ↦ p.1.2.1 i)
-      (by rw [p.1.2.2]; exact zero_lt_one) (fun i _ ↦ (p.2 i).property)
-
-omit [MeasurableSpace E] [BorelSpace E] in
-private theorem isCompact_convexHull_of_isCompact [FiniteDimensional ℝ E]
-    {C : Set E} (hC : IsCompact C) :
-    IsCompact (convexHull ℝ C) := by
-  by_cases hCne : C.Nonempty
-  · rw [convexHull_eq_caratheodoryBarycenters hCne, caratheodoryBarycenters]
-    letI : CompactSpace C := isCompact_iff_compactSpace.mp hC
-    apply IsCompact.image isCompact_univ
-    apply continuous_finsetSum Finset.univ
-    intro i _
-    exact ((continuous_apply i).comp (continuous_subtype_val.comp continuous_fst)).smul
-      (continuous_subtype_val.comp ((continuous_apply i).comp continuous_snd))
-  · rw [not_nonempty_iff_eq_empty.mp hCne, convexHull_empty]
-    exact isCompact_empty
-
 private def holesBefore (U : ℕ → Set E) (n : ℕ) : Set E :=
   ⋃ i : Fin n, U i
 
@@ -923,28 +823,29 @@ private theorem closure_core_union_bridges_sdiff
       _ < delta := by linarith
     exact (lt_irrefl _ hcontradiction).elim
 
-private noncomputable def compactStage [FiniteDimensional ℝ E] {C : Set E}
+private noncomputable def compactStage [CompleteSpace E] {C : Set E}
     {U : ℕ → Set E} {eta : ℕ → ℝ}
     {x y : E} (P : SurgeryData C U eta x y) (n : ℕ) :
-    TopologicalSpace.NonemptyCompacts (convexHull ℝ C) := by
-  letI : CompactSpace (convexHull ℝ C) :=
-    isCompact_iff_compactSpace.mp (isCompact_convexHull_of_isCompact P.isCompact_core)
+    TopologicalSpace.NonemptyCompacts (closure (convexHull ℝ C)) := by
+  letI : CompactSpace (closure (convexHull ℝ C)) :=
+    isCompact_iff_compactSpace.mp (isCompact_closure_convexHull P.isCompact_core)
   exact {
     carrier := {q | (q : E) ∈ (P.stages n).carrier}
     isCompact' :=
       ((P.stages n).isCompact_carrier.isClosed.preimage continuous_subtype_val).isCompact
     nonempty' :=
-      ⟨⟨x, (P.stages n).subset_convexHull (P.stages n).left_mem⟩,
+      ⟨⟨x, subset_closure ((P.stages n).subset_convexHull (P.stages n).left_mem)⟩,
         (P.stages n).left_mem⟩ }
 
-private theorem isConnected_compactStage [FiniteDimensional ℝ E] {C : Set E}
+private theorem isConnected_compactStage [CompleteSpace E] {C : Set E}
     {U : ℕ → Set E} {eta : ℕ → ℝ}
     {x y : E} (P : SurgeryData C U eta x y) (n : ℕ) :
-    IsConnected (P.compactStage n : Set (convexHull ℝ C)) := by
-  refine ⟨⟨⟨x, (P.stages n).subset_convexHull (P.stages n).left_mem⟩,
+    IsConnected (P.compactStage n : Set (closure (convexHull ℝ C))) := by
+  refine ⟨⟨⟨x, subset_closure ((P.stages n).subset_convexHull (P.stages n).left_mem)⟩,
     (P.stages n).left_mem⟩, ?_⟩
   exact Besicovitch.IsPreconnected.preimage_subtype_of_subset
-    (P.stages n).isConnected_carrier.isPreconnected (P.stages n).subset_convexHull
+    (P.stages n).isConnected_carrier.isPreconnected
+    ((P.stages n).subset_convexHull.trans subset_closure)
 
 end SurgeryData
 
@@ -999,43 +900,45 @@ private theorem isConnected_nonemptyCompacts_limit
 
 namespace SurgeryData
 
-private theorem exists_limit [FiniteDimensional ℝ E] {C : Set E}
+private theorem exists_limit [CompleteSpace E] {C : Set E}
     {U : ℕ → Set E} {eta : ℕ → ℝ}
     {x y : E} (P : SurgeryData C U eta x y) :
     ∃ D : Set E,
-      IsCompact D ∧ IsConnected D ∧ x ∈ D ∧ y ∈ D ∧ D ⊆ convexHull ℝ C ∧
+      IsCompact D ∧ IsConnected D ∧ x ∈ D ∧ y ∈ D ∧ D ⊆ closure (convexHull ℝ C) ∧
         D ⊆ closure (C ∪ ⋃ i, P.bridge i) ∧ ∀ i, D ∩ U i ⊆ P.bridge i := by
-  letI : CompactSpace (convexHull ℝ C) :=
-    isCompact_iff_compactSpace.mp (isCompact_convexHull_of_isCompact P.isCompact_core)
+  letI : CompactSpace (closure (convexHull ℝ C)) :=
+    isCompact_iff_compactSpace.mp (isCompact_closure_convexHull P.isCompact_core)
   obtain ⟨L, phi, hphi, hlimit⟩ := CompactSpace.tendsto_subseq P.compactStage
-  let D : Set E := Subtype.val '' (L : Set (convexHull ℝ C))
-  have hLconnected : IsConnected (L : Set (convexHull ℝ C)) :=
+  let D : Set E := Subtype.val '' (L : Set (closure (convexHull ℝ C)))
+  have hLconnected : IsConnected (L : Set (closure (convexHull ℝ C))) :=
     isConnected_nonemptyCompacts_limit (fun n ↦ P.compactStage (phi n)) L
       (fun n ↦ P.isConnected_compactStage (phi n)) hlimit
   have hDcompact : IsCompact D := L.isCompact.image continuous_subtype_val
   have hDconnected : IsConnected D :=
     hLconnected.image Subtype.val continuous_subtype_val.continuousOn
-  let xHull : convexHull ℝ C := ⟨x, subset_convexHull ℝ C P.left_mem_core⟩
-  let yHull : convexHull ℝ C := ⟨y, subset_convexHull ℝ C P.right_mem_core⟩
+  let xHull : closure (convexHull ℝ C) :=
+    ⟨x, subset_closure (subset_convexHull ℝ C P.left_mem_core)⟩
+  let yHull : closure (convexHull ℝ C) :=
+    ⟨y, subset_closure (subset_convexHull ℝ C P.right_mem_core)⟩
   have hxL : xHull ∈ L := by
-    have hhit : ((L : Set (convexHull ℝ C)) ∩ {xHull}).Nonempty :=
+    have hhit : ((L : Set (closure (convexHull ℝ C))) ∩ {xHull}).Nonempty :=
       (TopologicalSpace.NonemptyCompacts.isClosed_inter_nonempty_of_isClosed
         isClosed_singleton).mem_of_tendsto hlimit <| Filter.Eventually.of_forall fun n ↦
           ⟨xHull, (P.stages (phi n)).left_mem, rfl⟩
     obtain ⟨q, hqL, hqx⟩ := hhit
     exact (mem_singleton_iff.mp hqx) ▸ hqL
   have hyL : yHull ∈ L := by
-    have hhit : ((L : Set (convexHull ℝ C)) ∩ {yHull}).Nonempty :=
+    have hhit : ((L : Set (closure (convexHull ℝ C))) ∩ {yHull}).Nonempty :=
       (TopologicalSpace.NonemptyCompacts.isClosed_inter_nonempty_of_isClosed
         isClosed_singleton).mem_of_tendsto hlimit <| Filter.Eventually.of_forall fun n ↦
           ⟨yHull, (P.stages (phi n)).right_mem, rfl⟩
     obtain ⟨q, hqL, hqy⟩ := hhit
     exact (mem_singleton_iff.mp hqy) ▸ hqL
   have hDclosure : D ⊆ closure (C ∪ ⋃ i, P.bridge i) := by
-    let F : Set (convexHull ℝ C) :=
+    let F : Set (closure (convexHull ℝ C)) :=
       Subtype.val ⁻¹' closure (C ∪ ⋃ i, P.bridge i)
     have hFclosed : IsClosed F := isClosed_closure.preimage continuous_subtype_val
-    have hLsubset : (L : Set (convexHull ℝ C)) ⊆ F :=
+    have hLsubset : (L : Set (closure (convexHull ℝ C))) ⊆ F :=
       (TopologicalSpace.NonemptyCompacts.isClosed_subsets_of_isClosed
         hFclosed).mem_of_tendsto hlimit <| Filter.Eventually.of_forall fun n q hq ↦ by
           apply subset_closure
@@ -1049,14 +952,14 @@ private theorem exists_limit [FiniteDimensional ℝ E] {C : Set E}
     intro i z hz
     obtain ⟨q, hqL, rfl⟩ := hz.1
     by_contra hqbridge
-    let V : Set (convexHull ℝ C) := Subtype.val ⁻¹' (U i \ P.bridge i)
+    let V : Set (closure (convexHull ℝ C)) := Subtype.val ⁻¹' (U i \ P.bridge i)
     have hVopen : IsOpen V :=
       ((P.isOpen_hole i).sdiff (P.isCompact_bridge i).isClosed).preimage
         continuous_subtype_val
-    have hLmeet : ((L : Set (convexHull ℝ C)) ∩ V).Nonempty :=
+    have hLmeet : ((L : Set (closure (convexHull ℝ C))) ∩ V).Nonempty :=
       ⟨q, hqL, hz.2, hqbridge⟩
     have hmeet : ∀ᶠ n in Filter.atTop,
-        (((P.compactStage (phi n) : Set (convexHull ℝ C)) ∩ V).Nonempty) :=
+        (((P.compactStage (phi n) : Set (closure (convexHull ℝ C))) ∩ V).Nonempty) :=
       hlimit.eventually <|
         (TopologicalSpace.NonemptyCompacts.isOpen_inter_nonempty_of_isOpen hVopen).mem_nhds
           hLmeet
@@ -1075,7 +978,7 @@ end SurgeryData
 
 /-- Countably many disjoint open convex holes can be bypassed without changing a
 diameter-realizing pair, at a total length cost bounded by their diameters. -/
-theorem exists_continuum_surgery [FiniteDimensional ℝ E] {C : Set E} (hCcompact : IsCompact C)
+theorem exists_continuum_surgery [CompleteSpace E] {C : Set E} (hCcompact : IsCompact C)
     (hCconnected : IsConnected C) {x y : E}
     (hxC : x ∈ C) (hyC : y ∈ C)
     (hxy : edist x y = Metric.ediam C) (U : ℕ → Set E)
@@ -1086,7 +989,7 @@ theorem exists_continuum_surgery [FiniteDimensional ℝ E] {C : Set E} (hCcompac
     (hepsilon : 0 < epsilon) :
     ∃ D : Set E,
       IsCompact D ∧ IsConnected D ∧ x ∈ D ∧ y ∈ D ∧
-        Metric.ediam D = Metric.ediam C ∧ D ⊆ convexHull ℝ C ∧
+        Metric.ediam D = Metric.ediam C ∧ D ⊆ closure (convexHull ℝ C) ∧
         D \ ⋃ i, U i ⊆ C \ ⋃ i, U i ∧
         μH[1] (D ∩ ⋃ i, U i) ≤ (∑' i, Metric.ediam (U i)) + ENNReal.ofReal epsilon ∧
         μH[1] D ≤ μH[1] C + (∑' i, Metric.ediam (U i)) + ENNReal.ofReal epsilon := by
@@ -1106,7 +1009,8 @@ theorem exists_continuum_surgery [FiniteDimensional ℝ E] {C : Set E} (hCcompac
   obtain ⟨D, hDcompact, hDconnected, hxD, hyD, hDhull, hDclosure, hDinside⟩ :=
     P.exists_limit
   have hDediam : Metric.ediam D = Metric.ediam C := by
-    apply le_antisymm (Metric.ediam_mono hDhull |>.trans_eq (convexHull_ediam C))
+    apply le_antisymm ((Metric.ediam_mono hDhull).trans_eq
+      ((Metric.ediam_closure _).trans (convexHull_ediam C)))
     rw [← hxy]
     exact Metric.edist_le_ediam_of_mem hxD hyD
   have hDoutside : D \ ⋃ i, U i ⊆ C \ ⋃ i, U i := by
@@ -1147,7 +1051,7 @@ theorem exists_continuum_surgery [FiniteDimensional ℝ E] {C : Set E} (hCcompac
     hinsideMeasure, htotalMeasure⟩
 
 /-- The continuum-surgery theorem for a countable index type. -/
-theorem exists_continuum_surgery_countable [FiniteDimensional ℝ E] {iota : Type*} [Countable iota]
+theorem exists_continuum_surgery_countable [CompleteSpace E] {iota : Type*} [Countable iota]
     {C : Set E} (hCcompact : IsCompact C) (hCconnected : IsConnected C)
     {x y : E} (hxC : x ∈ C) (hyC : y ∈ C)
     (hxy : edist x y = Metric.ediam C) (U : iota → Set E)
@@ -1158,7 +1062,7 @@ theorem exists_continuum_surgery_countable [FiniteDimensional ℝ E] {iota : Typ
     (hepsilon : 0 < epsilon) :
     ∃ D : Set E,
       IsCompact D ∧ IsConnected D ∧ x ∈ D ∧ y ∈ D ∧
-        Metric.ediam D = Metric.ediam C ∧ D ⊆ convexHull ℝ C ∧
+        Metric.ediam D = Metric.ediam C ∧ D ⊆ closure (convexHull ℝ C) ∧
         D \ ⋃ i, U i ⊆ C \ ⋃ i, U i ∧
         μH[1] (D ∩ ⋃ i, U i) ≤ (∑' i, Metric.ediam (U i)) + ENNReal.ofReal epsilon ∧
         μH[1] D ≤ μH[1] C + (∑' i, Metric.ediam (U i)) + ENNReal.ofReal epsilon := by
@@ -1288,7 +1192,7 @@ theorem exists_pairwiseDisjoint_convex_hole_cover_countable
 
 /-- Surgery for arbitrary countably many open holes. The part not inherited from the old
 continuum outside the holes has measure strictly smaller than the preserved diameter. -/
-theorem exists_continuum_surgery_open_holes [FiniteDimensional ℝ E] {iota : Type*}
+theorem exists_continuum_surgery_open_holes [CompleteSpace E] {iota : Type*}
     [Countable iota]
     {C : Set E} (hCcompact : IsCompact C) (hCconnected : IsConnected C)
     {x y : E} (hxC : x ∈ C) (hyC : y ∈ C)
@@ -1297,7 +1201,7 @@ theorem exists_continuum_surgery_open_holes [FiniteDimensional ℝ E] {iota : Ty
     (hsum : (∑' i, Metric.ediam (U i)) < Metric.ediam C) :
     ∃ D : Set E,
       IsCompact D ∧ IsConnected D ∧ x ∈ D ∧ y ∈ D ∧
-        Metric.ediam D = Metric.ediam C ∧ D ⊆ convexHull ℝ C ∧
+        Metric.ediam D = Metric.ediam C ∧ D ⊆ closure (convexHull ℝ C) ∧
         μH[1] (D \ (C \ ⋃ i, U i)) < Metric.ediam C ∧
         μH[1] (D ∩ ⋃ i, U i) < Metric.ediam C ∧
         μH[1] D ≤ μH[1] (C \ ⋃ i, U i) + Metric.ediam C := by

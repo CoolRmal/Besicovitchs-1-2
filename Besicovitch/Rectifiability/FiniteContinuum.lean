@@ -7,6 +7,7 @@ module
 
 public import Besicovitch.Rectifiability.Continuum
 public import Besicovitch.Rectifiability.Basic
+public import Besicovitch.Geometry.CompactConvexHull
 public import Mathlib.Analysis.Normed.Affine.AddTorsor
 public import Mathlib.Analysis.SpecificLimits.Basic
 public import Mathlib.Combinatorics.SimpleGraph.Acyclic
@@ -16,7 +17,7 @@ public import Mathlib.Topology.MetricSpace.CoveringNumbers
 /-!
 # Finite-length continua
 
-Compact connected subsets of a proper real normed space with finite Hausdorff one-measure have a
+Compact connected subsets of a complete real normed space with finite Hausdorff one-measure have a
 Lipschitz parametrization.  This is the Eilenberg--Harrold finite-length continuum theorem.
 -/
 
@@ -111,6 +112,19 @@ private theorem polygonalChain_cons_of_one_le (x y : E)
     (l : List E) {t : ℝ}
     (ht : 1 ≤ t) : polygonalChain x (y :: l) t = polygonalChain y l (t - 1) := by
   simp [polygonalChain, ht.not_gt]
+
+private theorem polygonalChain_mem_convexHull {x : E} {l : List E} {s : Set E}
+    (hvertices : ∀ z ∈ x :: l, z ∈ s) {t : ℝ} (ht : 0 ≤ t) :
+    polygonalChain x l t ∈ convexHull ℝ s := by
+  induction l generalizing x t with
+  | nil => exact subset_convexHull ℝ s (hvertices x (by simp))
+  | cons y l ih =>
+      by_cases ht_one : t < 1
+      · rw [polygonalChain_cons_of_lt _ _ _ ht_one]
+        apply segment_subset_convexHull (hvertices x (by simp)) (hvertices y (by simp))
+        exact lineMap_mem_segment ℝ x y ⟨ht, ht_one.le⟩
+      · rw [polygonalChain_cons_of_one_le _ _ _ (le_of_not_gt ht_one)]
+        exact ih (fun z hz ↦ hvertices z (List.mem_cons_of_mem x hz)) (by linarith)
 
 private theorem polygonalChain_dist_le_crossing
     {x y : E}
@@ -530,7 +544,7 @@ private theorem exists_uniform_lipschitz_approximation
     ∃ f : I → E,
       LipschitzWith (Real.toNNReal (24 * (μH[1] s).toReal)) f ∧
       (∀ x ∈ s, ∃ t, dist x (f t) ≤ 2 * ε) ∧
-      ∀ t, ∃ x ∈ s, dist (f t) x ≤ 6 * ε := by
+      (∀ t, ∃ x ∈ s, dist (f t) x ≤ 6 * ε) ∧ range f ⊆ convexHull ℝ s := by
   obtain ⟨v, l, hchain, hvertices, hcover, hslope⟩ :=
     exists_short_polygonal_tour hs hsc ha hb hmeasure hεpos hεdiam
   let f : I → E := unitPolygonalChain v l
@@ -545,7 +559,7 @@ private theorem exists_uniform_lipschitz_approximation
     exact hslope
   have hf : LipschitzWith (Real.toNNReal (24 * (μH[1] s).toReal)) f :=
     hf_raw.weaken hconstant
-  refine ⟨f, hf, ?_, ?_⟩
+  refine ⟨f, hf, ?_, ?_, ?_⟩
   · intro x hx
     obtain ⟨w, hwlist, hxw⟩ := hcover x hx
     obtain ⟨t, htw⟩ := vertex_mem_range_unitPolygonalChain hwlist
@@ -555,12 +569,14 @@ private theorem exists_uniform_lipschitz_approximation
   · intro t
     obtain ⟨x, hxlist, htx⟩ := unitPolygonalChain_near_vertex (by positivity) hchain t
     exact ⟨x, hvertices x hxlist, htx⟩
+  · rintro _ ⟨t, rfl⟩
+    exact polygonalChain_mem_convexHull hvertices (mul_nonneg (by positivity) t.2.1)
 
 omit [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E] in
-private theorem exists_lipschitz_uniform_subsequence [ProperSpace E]
+private theorem exists_lipschitz_uniform_subsequence
     (F : ℕ → I →ᵇ E) {K : ℝ≥0}
-    (hF : ∀ n, LipschitzWith K (F n)) {a : E} {R : ℝ}
-    (hball : ∀ n t, F n t ∈ Metric.closedBall a R) :
+    (hF : ∀ n, LipschitzWith K (F n)) {Q : Set E} (hQ : IsCompact Q)
+    (hball : ∀ n t, F n t ∈ Q) :
     ∃ g : I →ᵇ E, ∃ ψ : ℕ → ℕ, StrictMono ψ ∧
       Tendsto (fun n ↦ F (ψ n)) atTop (𝓝 g) ∧ LipschitzWith K g := by
   let A : Set (I →ᵇ E) := range F
@@ -574,12 +590,11 @@ private theorem exists_lipschitz_uniform_subsequence [ProperSpace E]
     rcases q with ⟨q, ⟨n, rfl⟩⟩
     exact (hF n).dist_le_mul x y
   have hA_ball (q : I →ᵇ E) (t : I) (hq : q ∈ A) :
-      q t ∈ Metric.closedBall a R := by
+      q t ∈ Q := by
     obtain ⟨n, rfl⟩ := hq
     exact hball n t
   have hcompact : IsCompact (closure A) :=
-    BoundedContinuousFunction.arzela_ascoli (Metric.closedBall a R)
-      (isCompact_closedBall a R) A hA_ball hA_equi
+    BoundedContinuousFunction.arzela_ascoli Q hQ A hA_ball hA_equi
   have hF_closure (n : ℕ) : F n ∈ closure A := subset_closure ⟨n, rfl⟩
   obtain ⟨g, -, ψ, hψ, hψlim⟩ := hcompact.tendsto_subseq hF_closure
   refine ⟨g, ψ, hψ, hψlim, ?_⟩
@@ -637,7 +652,7 @@ private theorem subset_range_uniform_limit_of_dense
       _ < r := by linarith
   exact ⟨u, tendsto_nhds_unique hcurve_lim hpoint_lim⟩
 
-private theorem exists_unitInterval_lipschitz_surjection_of_not_subsingleton [ProperSpace E]
+private theorem exists_unitInterval_lipschitz_surjection_of_not_subsingleton [CompleteSpace E]
     {s : Set E} (hs : IsConnected s)
     (hsc : IsCompact s) (hss : ¬s.Subsingleton)
     (hmeasure : μH[1] s ≠ ∞) :
@@ -662,25 +677,15 @@ private theorem exists_unitInterval_lipschitz_surjection_of_not_subsingleton [Pr
     · simp
   have hexists (n : ℕ) :=
     exists_uniform_lipschitz_approximation hs hsc ha hb hmeasure (hεpos n) (hεdiam n)
-  choose f hf hcover hnear using hexists
+  choose f hf hcover hnear hhull using hexists
   let K : ℝ≥0 := Real.toNNReal (24 * (μH[1] s).toReal)
   let F : ℕ → I →ᵇ E := fun n ↦
     BoundedContinuousFunction.mkOfCompact ⟨f n, (hf n).continuous⟩
-  obtain ⟨R, hR⟩ := hsc.isBounded.subset_closedBall a
-  have hdR : dist a b ≤ R := by
-    have := hR hb
-    simpa only [Metric.mem_closedBall, dist_comm] using this
-  have hF_ball (n : ℕ) (t : I) : F n t ∈ Metric.closedBall a (7 * R) := by
-    obtain ⟨x, hx, hfx⟩ := hnear n t
-    rw [Metric.mem_closedBall]
-    calc
-      dist (F n t) a ≤ dist (F n t) x + dist x a := dist_triangle _ _ _
-      _ ≤ 6 * ε n + R := add_le_add hfx (hR hx)
-      _ ≤ 6 * dist a b + R := by gcongr; exact hεdiam n
-      _ ≤ 7 * R := by linarith
+  have hF_hull (n : ℕ) (t : I) : F n t ∈ closure (convexHull ℝ s) :=
+    subset_closure (hhull n ⟨t, rfl⟩)
   have hFlip (n : ℕ) : LipschitzWith K (F n) := hf n
   obtain ⟨g, ψ, hψ, hψlim, hglip⟩ :=
-    exists_lipschitz_uniform_subsequence F hFlip hF_ball
+    exists_lipschitz_uniform_subsequence F hFlip (isCompact_closure_convexHull hsc) hF_hull
   have hεψ : Tendsto (fun n ↦ (ε (ψ n) : ℝ)) atTop (𝓝 0) :=
     hεlim.comp hψ.tendsto_atTop
   have hgs : range g ⊆ s := range_uniform_limit_subset_of_near hsc.isClosed hεψ hψlim
@@ -691,7 +696,7 @@ private theorem exists_unitInterval_lipschitz_surjection_of_not_subsingleton [Pr
 
 /-- **Eilenberg--Harrold.** A compact connected set of finite length is the range of a
 global Lipschitz curve. -/
-theorem IsConnected.exists_lipschitzWith_range_eq [ProperSpace E]
+theorem IsConnected.exists_lipschitzWith_range_eq [CompleteSpace E]
     {s : Set E} (hs : IsConnected s)
     (hsc : IsCompact s) (hmeasure : μH[1] s ≠ ∞) :
     ∃ K : ℝ≥0, ∃ f : ℝ → E,
@@ -711,7 +716,7 @@ theorem IsConnected.exists_lipschitzWith_range_eq [ProperSpace E]
 
 /-- A compact connected set of finite Hausdorff one-measure is countably
 one-rectifiable. -/
-theorem IsConnected.isCountablyOneRectifiable_of_isCompact [ProperSpace E] {s : Set E}
+theorem IsConnected.isCountablyOneRectifiable_of_isCompact [CompleteSpace E] {s : Set E}
     (hs : IsConnected s) (hsc : IsCompact s) (hmeasure : μH[1] s ≠ ∞) :
     IsCountablyOneRectifiable s := by
   obtain ⟨K, f, hf, hfs⟩ := IsConnected.exists_lipschitzWith_range_eq hs hsc hmeasure
